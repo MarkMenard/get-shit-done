@@ -1564,3 +1564,204 @@ describe('phase complete milestone-scoped next-phase', () => {
 // milestone complete command
 // ─────────────────────────────────────────────────────────────────────────────
 
+// ─────────────────────────────────────────────────────────────────────────────
+// namespace-aware phase operations (Phase 2, Plan 2)
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('namespace-aware phase operations', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = createTempProject();
+    // Set up .active namespace
+    fs.writeFileSync(path.join(tmpDir, '.planning', '.active'), 'my-project', 'utf-8');
+    // Create namespaced structure
+    fs.mkdirSync(path.join(tmpDir, '.planning', 'my-project', 'phases'), { recursive: true });
+    // Create a valid ROADMAP.md under namespaced root
+    fs.writeFileSync(
+      path.join(tmpDir, '.planning', 'my-project', 'ROADMAP.md'),
+      `# Roadmap\n\n### Phase 1: Foundation\n**Goal:** Setup\n\n### Phase 2: API\n**Goal:** Build API\n`
+    );
+  });
+
+  afterEach(() => {
+    cleanup(tmpDir);
+  });
+
+  test('cmdPhasesList returns phases from namespaced phases directory when .active is set', () => {
+    // Create phases under the namespaced path
+    fs.mkdirSync(path.join(tmpDir, '.planning', 'my-project', 'phases', '01-foundation'), { recursive: true });
+    fs.mkdirSync(path.join(tmpDir, '.planning', 'my-project', 'phases', '02-api'), { recursive: true });
+
+    const result = runGsdTools('phases list', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+
+    const output = JSON.parse(result.output);
+    assert.deepStrictEqual(
+      output.directories,
+      ['01-foundation', '02-api'],
+      'should list phases from namespaced directory'
+    );
+    assert.strictEqual(output.count, 2, 'should count namespaced phases');
+  });
+
+  test('cmdPhasesList with .active ignores flat .planning/phases directory', () => {
+    // Create phases under BOTH flat and namespaced paths
+    fs.mkdirSync(path.join(tmpDir, '.planning', 'phases', '01-flat'), { recursive: true });
+    fs.mkdirSync(path.join(tmpDir, '.planning', 'my-project', 'phases', '01-namespaced'), { recursive: true });
+
+    const result = runGsdTools('phases list', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+
+    const output = JSON.parse(result.output);
+    // Should only see namespaced phases, not flat
+    assert.deepStrictEqual(
+      output.directories,
+      ['01-namespaced'],
+      'should list only namespaced phases when .active is set'
+    );
+  });
+
+  test('cmdPhaseAdd creates directory under namespaced phases path and result.directory is namespaced', () => {
+    const result = runGsdTools('phase add "Test Phase"', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+
+    const output = JSON.parse(result.output);
+    assert.ok(
+      output.directory.startsWith('.planning/my-project/'),
+      `Expected directory to start with '.planning/my-project/', got: ${output.directory}`
+    );
+
+    // Directory should physically exist under namespaced path
+    const expectedDir = path.join(tmpDir, '.planning', 'my-project', 'phases', output.directory.split('/').pop());
+    // Reconstruct from output.directory
+    const physicalDir = path.join(tmpDir, output.directory.replace(/\//g, path.sep));
+    assert.ok(fs.existsSync(physicalDir), `Directory should exist at namespaced path: ${physicalDir}`);
+
+    // Verify it was NOT created at the flat path
+    const flatDir = path.join(tmpDir, '.planning', 'phases');
+    assert.ok(!fs.existsSync(flatDir) || fs.readdirSync(flatDir).length === 0,
+      'Should not create directory under flat .planning/phases when namespace is active'
+    );
+  });
+
+  test('cmdPhaseNextDecimal resolves against namespaced phases directory', () => {
+    // Create decimal phases under namespaced path
+    fs.mkdirSync(path.join(tmpDir, '.planning', 'my-project', 'phases', '01-foundation'), { recursive: true });
+    fs.mkdirSync(path.join(tmpDir, '.planning', 'my-project', 'phases', '01.1-hotfix'), { recursive: true });
+    fs.mkdirSync(path.join(tmpDir, '.planning', 'my-project', 'phases', '01.2-patch'), { recursive: true });
+
+    // Also create a different decimal at flat path to ensure namespace isolation
+    fs.mkdirSync(path.join(tmpDir, '.planning', 'phases', '01-foundation'), { recursive: true });
+    fs.mkdirSync(path.join(tmpDir, '.planning', 'phases', '01.1-other'), { recursive: true });
+    fs.mkdirSync(path.join(tmpDir, '.planning', 'phases', '01.2-more'), { recursive: true });
+    fs.mkdirSync(path.join(tmpDir, '.planning', 'phases', '01.3-extra'), { recursive: true });
+
+    const result = runGsdTools('phase next-decimal 01', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+
+    const output = JSON.parse(result.output);
+    // Should see 01.1 and 01.2 from namespaced path, so next is 01.3
+    assert.strictEqual(output.next, '01.3',
+      `Expected next decimal from namespaced path (01.3), got: ${output.next}`
+    );
+    assert.deepStrictEqual(output.existing, ['01.1', '01.2'],
+      'Should find existing decimals from namespaced directory only'
+    );
+  });
+
+  test('cmdPhasePlanIndex reads plans from namespaced phase directory', () => {
+    // Create namespaced phase with plans
+    const phaseDir = path.join(tmpDir, '.planning', 'my-project', 'phases', '01-foundation');
+    fs.mkdirSync(phaseDir, { recursive: true });
+    fs.writeFileSync(path.join(phaseDir, '01-01-PLAN.md'),
+      `---\nwave: 1\nautonomous: true\n---\n<objective>Foundation plan</objective>\n`
+    );
+    fs.writeFileSync(path.join(phaseDir, '01-01-SUMMARY.md'), '# Done');
+
+    const result = runGsdTools('phase-plan-index 01', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+
+    const output = JSON.parse(result.output);
+    assert.ok(output.plans.length > 0, 'should return plans from namespaced directory');
+    assert.strictEqual(output.plans[0].has_summary, true, 'should detect summary in namespaced directory');
+  });
+
+  test('cmdPhaseComplete archives to namespaced milestones directory', () => {
+    // Create namespaced phase with plans and summaries
+    const phaseDir = path.join(tmpDir, '.planning', 'my-project', 'phases', '01-foundation');
+    fs.mkdirSync(phaseDir, { recursive: true });
+    fs.writeFileSync(path.join(phaseDir, '01-01-PLAN.md'), '# Plan');
+    fs.writeFileSync(path.join(phaseDir, '01-01-SUMMARY.md'), '# Summary');
+
+    // Add ROADMAP with the phase listed as a checkbox
+    fs.writeFileSync(
+      path.join(tmpDir, '.planning', 'my-project', 'ROADMAP.md'),
+      `# Roadmap\n\n- [ ] Phase 1: Foundation\n\n### Phase 1: Foundation\n**Goal:** Setup\n**Plans:** 1 plans\n\n### Phase 2: API\n**Goal:** Build API\n`
+    );
+
+    fs.writeFileSync(
+      path.join(tmpDir, '.planning', 'my-project', 'STATE.md'),
+      `# State\n\n**Current Phase:** 01\n**Status:** In progress\n**Current Plan:** 01-01\n**Last Activity:** 2025-01-01\n**Last Activity Description:** Working\n`
+    );
+
+    const result = runGsdTools('phase complete 1', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+
+    const output = JSON.parse(result.output);
+    // Verify roadmap was updated (from namespaced path)
+    assert.ok(output.roadmap_updated, 'roadmap should be updated');
+
+    // Verify ROADMAP under namespaced path was updated
+    const roadmap = fs.readFileSync(
+      path.join(tmpDir, '.planning', 'my-project', 'ROADMAP.md'), 'utf-8'
+    );
+    assert.ok(roadmap.includes('[x]'), 'phase should be checked off in namespaced ROADMAP');
+
+    // Verify STATE.md under namespaced path was updated
+    const state = fs.readFileSync(
+      path.join(tmpDir, '.planning', 'my-project', 'STATE.md'), 'utf-8'
+    );
+    assert.ok(state.includes('**Current Phase:** 02') || state.includes('Ready to plan') || state.includes('Milestone complete'),
+      'namespaced STATE.md should be updated'
+    );
+  });
+
+  test('backward compat: cmdPhasesList without .active returns flat layout phases', () => {
+    // Remove .active
+    fs.unlinkSync(path.join(tmpDir, '.planning', '.active'));
+    // Create flat phases
+    fs.mkdirSync(path.join(tmpDir, '.planning', 'phases', '01-flat-phase'), { recursive: true });
+
+    const result = runGsdTools('phases list', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+
+    const output = JSON.parse(result.output);
+    assert.deepStrictEqual(output.directories, ['01-flat-phase'],
+      'without .active, should use flat .planning/phases layout'
+    );
+  });
+
+  test('backward compat: cmdPhaseAdd without .active creates directory under .planning/phases/', () => {
+    // Remove .active
+    fs.unlinkSync(path.join(tmpDir, '.planning', '.active'));
+    // Create a flat ROADMAP.md
+    fs.writeFileSync(
+      path.join(tmpDir, '.planning', 'ROADMAP.md'),
+      `# Roadmap\n\n### Phase 1: Foundation\n**Goal:** Setup\n`
+    );
+
+    const result = runGsdTools('phase add "New Phase"', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+
+    const output = JSON.parse(result.output);
+    assert.ok(
+      output.directory.startsWith('.planning/phases/'),
+      `Expected directory to start with '.planning/phases/', got: ${output.directory}`
+    );
+    assert.ok(!output.directory.startsWith('.planning/my-project/'),
+      'Should not use namespace prefix without .active'
+    );
+  });
+});
+
