@@ -65,6 +65,36 @@ function safeReadFile(filePath) {
   }
 }
 
+// ─── Namespace path resolution ────────────────────────────────────────────────
+
+/**
+ * Resolve the planning root directory for a given working directory.
+ *
+ * - If slug is provided, returns path.join(cwd, '.planning', slug).
+ * - If no slug is provided, reads .planning/.active to get the active namespace slug.
+ * - If .active is missing or blank, falls back to path.join(cwd, '.planning').
+ *
+ * This is a pure path resolver — it never checks whether the returned directory exists.
+ * It never throws.
+ */
+function planningRoot(cwd, slug) {
+  if (!slug) {
+    const raw = safeReadFile(path.join(cwd, '.planning', '.active'));
+    if (raw) slug = raw.trim();
+  }
+  if (!slug) return path.join(cwd, '.planning');
+  return path.join(cwd, '.planning', slug);
+}
+
+/**
+ * Write .planning/.active with the given slug, creating .planning/ if needed.
+ */
+function writeActiveFile(cwd, slug) {
+  const planningDir = path.join(cwd, '.planning');
+  fs.mkdirSync(planningDir, { recursive: true });
+  fs.writeFileSync(path.join(planningDir, '.active'), slug, 'utf-8');
+}
+
 function loadConfig(cwd) {
   const configPath = path.join(cwd, '.planning', 'config.json');
   const defaults = {
@@ -473,6 +503,8 @@ module.exports = {
   output,
   error,
   safeReadFile,
+  planningRoot,
+  writeActiveFile,
   loadConfig,
   isGitIgnored,
   execGit,
