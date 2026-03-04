@@ -844,6 +844,138 @@ describe('cmdInitNewMilestone', () => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
+// namespace-aware init (Phase 2, Plan 1)
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('namespace-aware init', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = createTempProject();
+    // Set up .active namespace
+    fs.writeFileSync(path.join(tmpDir, '.planning', '.active'), 'my-project', 'utf-8');
+    // Create namespaced structure
+    fs.mkdirSync(path.join(tmpDir, '.planning', 'my-project', 'phases', '03-api'), { recursive: true });
+    fs.writeFileSync(path.join(tmpDir, '.planning', 'my-project', 'phases', '03-api', '03-01-PLAN.md'), '# Plan');
+    fs.writeFileSync(
+      path.join(tmpDir, '.planning', 'my-project', 'STATE.md'),
+      '# State\n'
+    );
+    fs.writeFileSync(
+      path.join(tmpDir, '.planning', 'my-project', 'ROADMAP.md'),
+      '## Roadmap v1.0: My Project\n\n### Phase 3: API\n**Goal:** Build API\n'
+    );
+    fs.writeFileSync(
+      path.join(tmpDir, '.planning', 'my-project', 'config.json'),
+      JSON.stringify({ model_profile: 'balanced', commit_docs: false })
+    );
+  });
+
+  afterEach(() => {
+    cleanup(tmpDir);
+  });
+
+  test('cmdInitExecutePhase returns planning_root field when .active is set', () => {
+    const result = runGsdTools('init execute-phase 03', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+
+    const output = JSON.parse(result.output);
+    assert.strictEqual(output.planning_root, '.planning/my-project',
+      `Expected planning_root='.planning/my-project', got: ${output.planning_root}`);
+  });
+
+  test('cmdInitExecutePhase returns namespaced state_path when .active is set', () => {
+    const result = runGsdTools('init execute-phase 03', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+
+    const output = JSON.parse(result.output);
+    assert.strictEqual(output.state_path, '.planning/my-project/STATE.md',
+      `Expected state_path='.planning/my-project/STATE.md', got: ${output.state_path}`);
+    assert.strictEqual(output.roadmap_path, '.planning/my-project/ROADMAP.md',
+      `Expected roadmap_path='.planning/my-project/ROADMAP.md', got: ${output.roadmap_path}`);
+    assert.strictEqual(output.config_path, '.planning/my-project/config.json',
+      `Expected config_path='.planning/my-project/config.json', got: ${output.config_path}`);
+  });
+
+  test('cmdInitExecutePhase phase_dir is under namespaced phases path', () => {
+    const result = runGsdTools('init execute-phase 03', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+
+    const output = JSON.parse(result.output);
+    assert.ok(
+      output.phase_dir && output.phase_dir.startsWith('.planning/my-project/phases/'),
+      `Expected phase_dir to start with .planning/my-project/phases/, got: ${output.phase_dir}`
+    );
+  });
+
+  test('cmdInitPlanPhase returns planning_root and namespaced paths when .active set', () => {
+    const result = runGsdTools('init plan-phase 03', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+
+    const output = JSON.parse(result.output);
+    assert.strictEqual(output.planning_root, '.planning/my-project',
+      `Expected planning_root='.planning/my-project', got: ${output.planning_root}`);
+    assert.ok(
+      output.phase_dir && output.phase_dir.startsWith('.planning/my-project/phases/'),
+      `Expected phase_dir under namespace, got: ${output.phase_dir}`
+    );
+    assert.strictEqual(output.state_path, '.planning/my-project/STATE.md');
+    assert.strictEqual(output.roadmap_path, '.planning/my-project/ROADMAP.md');
+  });
+
+  test('cmdInitNewProject returns planning_root and namespaced project_path', () => {
+    const result = runGsdTools('init new-project', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+
+    const output = JSON.parse(result.output);
+    assert.strictEqual(output.planning_root, '.planning/my-project',
+      `Expected planning_root='.planning/my-project', got: ${output.planning_root}`);
+    assert.strictEqual(output.project_path, '.planning/my-project/PROJECT.md',
+      `Expected project_path to be namespaced, got: ${output.project_path}`);
+  });
+
+  test('cmdInitResume returns planning_root and namespaced paths when .active set', () => {
+    const result = runGsdTools('init resume', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+
+    const output = JSON.parse(result.output);
+    assert.strictEqual(output.planning_root, '.planning/my-project');
+    assert.strictEqual(output.state_path, '.planning/my-project/STATE.md');
+    assert.strictEqual(output.roadmap_path, '.planning/my-project/ROADMAP.md');
+  });
+
+  test('cmdInitProgress returns planning_root and namespaced paths when .active set', () => {
+    const result = runGsdTools('init progress', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+
+    const output = JSON.parse(result.output);
+    assert.strictEqual(output.planning_root, '.planning/my-project');
+    assert.strictEqual(output.state_path, '.planning/my-project/STATE.md');
+    assert.strictEqual(output.roadmap_path, '.planning/my-project/ROADMAP.md');
+  });
+
+  // Backward compat: no .active → flat layout
+  test('all init functions return flat planning_root when no .active exists', () => {
+    // Create a flat project (no .active)
+    const flatDir = fs.mkdtempSync(path.join(require('os').tmpdir(), 'gsd-init-flat-test-'));
+    try {
+      fs.mkdirSync(path.join(flatDir, '.planning', 'phases'), { recursive: true });
+
+      const result = runGsdTools('init progress', flatDir);
+      assert.ok(result.success, `Command failed: ${result.error}`);
+
+      const output = JSON.parse(result.output);
+      assert.strictEqual(output.planning_root, '.planning',
+        `Expected planning_root='.planning' (flat), got: ${output.planning_root}`);
+      assert.strictEqual(output.state_path, '.planning/STATE.md',
+        `Expected flat state_path, got: ${output.state_path}`);
+    } finally {
+      cleanup(flatDir);
+    }
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
 // roadmap analyze command
 // ─────────────────────────────────────────────────────────────────────────────
 

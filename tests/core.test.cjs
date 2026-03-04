@@ -874,6 +874,108 @@ describe('planningRoot', () => {
   });
 });
 
+// ─── namespace-aware helpers ───────────────────────────────────────────────────
+
+describe('namespace-aware helpers', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'gsd-core-ns-test-'));
+    // Create .planning/.active pointing to 'my-project'
+    fs.mkdirSync(path.join(tmpDir, '.planning'), { recursive: true });
+    fs.writeFileSync(path.join(tmpDir, '.planning', '.active'), 'my-project', 'utf-8');
+
+    // Create namespaced directory structure
+    fs.mkdirSync(path.join(tmpDir, '.planning', 'my-project', 'phases', '02-test-phase'), { recursive: true });
+    fs.mkdirSync(path.join(tmpDir, '.planning', 'my-project', 'milestones', 'v1.0-phases', '01-old-phase'), { recursive: true });
+
+    // Create namespaced ROADMAP.md
+    fs.writeFileSync(
+      path.join(tmpDir, '.planning', 'my-project', 'ROADMAP.md'),
+      '## Roadmap v2.0: Namespaced Release\n\n### Phase 2: Test Phase\n**Goal:** Test namespace\n'
+    );
+  });
+
+  afterEach(() => {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  });
+
+  test('findPhaseInternal finds phase under namespaced phases directory', () => {
+    const result = findPhaseInternal(tmpDir, '02');
+    assert.ok(result !== null, 'Should find phase');
+    assert.strictEqual(result.found, true);
+    assert.ok(
+      result.directory.startsWith('.planning/my-project/phases/'),
+      `Expected directory to start with .planning/my-project/phases/, got: ${result.directory}`
+    );
+  });
+
+  test('findPhaseInternal searches namespaced milestones directory', () => {
+    const result = findPhaseInternal(tmpDir, '01');
+    assert.ok(result !== null, 'Should find archived phase');
+    assert.strictEqual(result.found, true);
+    assert.ok(
+      result.directory.includes('my-project/milestones/'),
+      `Expected directory to include my-project/milestones/, got: ${result.directory}`
+    );
+  });
+
+  test('getArchivedPhaseDirs searches namespaced milestones directory', () => {
+    const results = getArchivedPhaseDirs(tmpDir);
+    assert.ok(results.length > 0, 'Should find archived phase dirs');
+    const firstResult = results[0];
+    assert.ok(
+      firstResult.basePath.includes('my-project/milestones/'),
+      `Expected basePath to include my-project/milestones/, got: ${firstResult.basePath}`
+    );
+  });
+
+  test('getRoadmapPhaseInternal reads ROADMAP.md from namespaced path', () => {
+    const result = getRoadmapPhaseInternal(tmpDir, '2');
+    assert.ok(result !== null, 'Should find roadmap phase');
+    assert.strictEqual(result.found, true);
+    assert.strictEqual(result.phase_name, 'Test Phase');
+  });
+
+  test('getMilestoneInfo reads ROADMAP.md from namespaced path', () => {
+    const info = getMilestoneInfo(tmpDir);
+    assert.strictEqual(info.version, 'v2.0');
+    assert.strictEqual(info.name, 'Namespaced Release');
+  });
+
+  test('getMilestonePhaseFilter reads ROADMAP.md from namespaced path', () => {
+    const filter = getMilestonePhaseFilter(tmpDir);
+    assert.strictEqual(filter.phaseCount, 1, 'Should count 1 phase from namespaced ROADMAP');
+    assert.strictEqual(filter('02-test-phase'), true);
+    assert.strictEqual(filter('01-other'), false);
+  });
+
+  test('findPhaseInternal still works flat (no .active) — backward compat', () => {
+    // Create a separate flat tmpDir without .active
+    const flatDir = fs.mkdtempSync(path.join(os.tmpdir(), 'gsd-core-flat-test-'));
+    try {
+      fs.mkdirSync(path.join(flatDir, '.planning', 'phases', '03-flat-phase'), { recursive: true });
+      const result = findPhaseInternal(flatDir, '03');
+      assert.ok(result !== null, 'Should find phase in flat layout');
+      assert.strictEqual(result.found, true);
+      assert.ok(
+        result.directory.startsWith('.planning/phases/'),
+        `Expected flat directory starting with .planning/phases/, got: ${result.directory}`
+      );
+    } finally {
+      fs.rmSync(flatDir, { recursive: true, force: true });
+    }
+  });
+
+  test('getMilestoneInfo returns defaults when namespaced ROADMAP is missing', () => {
+    // Remove the namespaced ROADMAP to test fallback
+    fs.rmSync(path.join(tmpDir, '.planning', 'my-project', 'ROADMAP.md'));
+    const info = getMilestoneInfo(tmpDir);
+    assert.strictEqual(info.version, 'v1.0');
+    assert.strictEqual(info.name, 'milestone');
+  });
+});
+
 // ─── writeActiveFile ───────────────────────────────────────────────────────────
 
 describe('writeActiveFile', () => {
