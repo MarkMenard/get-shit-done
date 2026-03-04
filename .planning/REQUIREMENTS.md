@@ -10,7 +10,7 @@ Requirements for initial release. Each maps to roadmap phases.
 ### Path Resolution
 
 - [x] **PATH-01**: `planningRoot(cwd, slug)` function exists in core.cjs and returns `.planning/<slug>/`
-- [ ] **PATH-02**: All init commands (12 functions in init.cjs) return paths resolved through `planningRoot`
+- [x] **PATH-02**: All init commands (12 functions in init.cjs) return paths resolved through `planningRoot`
 - [x] **PATH-03**: `loadConfig()` resolves config.json through project slug
 - [x] **PATH-04**: Project slug is stored and retrievable from `.planning/<slug>/config.json`
 - [ ] **PATH-05**: All gsd-tools commands that read/write planning files resolve through `planningRoot`
@@ -31,8 +31,8 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Tool Updates
 
-- [ ] **TOOL-01**: All bin/lib/*.cjs files (init.cjs, core.cjs, phase.cjs, etc.) use `planningRoot` for path construction
-- [ ] **TOOL-02**: gsd-tools.js (main entry, 4,781 lines) routes all path references through resolution
+- [x] **TOOL-01**: All bin/lib/*.cjs files (init.cjs, core.cjs, phase.cjs, etc.) use `planningRoot` for path construction
+- [x] **TOOL-02**: gsd-tools.js (main entry, 4,781 lines) routes all path references through resolution
 - [ ] **TOOL-03**: Phase operations (next-decimal, add, insert, remove, complete) use resolved paths
 - [ ] **TOOL-04**: Roadmap operations (get-phase, analyze, update-plan-progress) use resolved paths
 - [ ] **TOOL-05**: Milestone operations use resolved paths for archiving
@@ -73,7 +73,7 @@ Requirements for initial release. Each maps to roadmap phases.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | PATH-01 | Phase 1 | Complete |
-| PATH-02 | Phase 2 | Pending |
+| PATH-02 | Phase 2 | Complete |
 | PATH-03 | Phase 1 | Complete |
 | PATH-04 | Phase 1 | Complete |
 | PATH-05 | Phase 2 | Pending |
@@ -85,8 +85,8 @@ Requirements for initial release. Each maps to roadmap phases.
 | WORK-02 | Phase 3 | Pending |
 | WORK-03 | Phase 3 | Pending |
 | WORK-04 | Phase 3 | Pending |
-| TOOL-01 | Phase 2 | Pending |
-| TOOL-02 | Phase 2 | Pending |
+| TOOL-01 | Phase 2 | Complete |
+| TOOL-02 | Phase 2 | Complete |
 | TOOL-03 | Phase 2 | Pending |
 | TOOL-04 | Phase 2 | Pending |
 | TOOL-05 | Phase 2 | Pending |
