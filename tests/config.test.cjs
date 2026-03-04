@@ -353,3 +353,114 @@ describe('config-get command', () => {
     assert.strictEqual(result.success, false);
   });
 });
+
+// ─── namespace-aware config (planningRoot integration) ────────────────────────
+
+describe('namespace-aware config operations', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = createTempProject();
+  });
+
+  afterEach(() => {
+    cleanup(tmpDir);
+  });
+
+  test('loadConfig reads from namespaced path when .active exists', () => {
+    // Write .active with slug
+    fs.writeFileSync(path.join(tmpDir, '.planning', '.active'), 'test-proj', 'utf-8');
+    // Create namespaced config
+    fs.mkdirSync(path.join(tmpDir, '.planning', 'test-proj'), { recursive: true });
+    fs.writeFileSync(
+      path.join(tmpDir, '.planning', 'test-proj', 'config.json'),
+      JSON.stringify({ model_profile: 'quality' }, null, 2),
+      'utf-8'
+    );
+
+    const { loadConfig } = require('../get-shit-done/bin/lib/core.cjs');
+    const config = loadConfig(tmpDir);
+    assert.strictEqual(config.model_profile, 'quality');
+  });
+
+  test('loadConfig falls back to flat .planning/config.json when no .active', () => {
+    // No .active file — write config directly to .planning/
+    fs.writeFileSync(
+      path.join(tmpDir, '.planning', 'config.json'),
+      JSON.stringify({ model_profile: 'budget' }, null, 2),
+      'utf-8'
+    );
+
+    const { loadConfig } = require('../get-shit-done/bin/lib/core.cjs');
+    const config = loadConfig(tmpDir);
+    assert.strictEqual(config.model_profile, 'budget');
+  });
+
+  test('config-ensure-section creates config in namespaced dir when .active exists', () => {
+    // Write .active with slug
+    fs.writeFileSync(path.join(tmpDir, '.planning', '.active'), 'test-proj', 'utf-8');
+    // Ensure namespaced dir exists but no config.json
+    fs.mkdirSync(path.join(tmpDir, '.planning', 'test-proj'), { recursive: true });
+
+    const result = runGsdTools('config-ensure-section', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+
+    // Config should be created inside the namespaced directory
+    const namespacedConfig = path.join(tmpDir, '.planning', 'test-proj', 'config.json');
+    assert.ok(fs.existsSync(namespacedConfig), 'config.json should exist in namespaced dir');
+    // Flat path should NOT have been created
+    const flatConfig = path.join(tmpDir, '.planning', 'config.json');
+    assert.ok(!fs.existsSync(flatConfig), 'config.json should NOT exist at flat .planning/ path');
+  });
+
+  test('config-ensure-section includes project_slug: null in defaults', () => {
+    // Fresh dir, no .active — flat layout
+    const result = runGsdTools('config-ensure-section', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+
+    const config = JSON.parse(
+      fs.readFileSync(path.join(tmpDir, '.planning', 'config.json'), 'utf-8')
+    );
+    assert.ok('project_slug' in config, 'project_slug should be present in default config');
+    assert.strictEqual(config.project_slug, null);
+  });
+
+  test('config-set writes to namespaced config when .active exists', () => {
+    // Write .active with slug
+    fs.writeFileSync(path.join(tmpDir, '.planning', '.active'), 'test-proj', 'utf-8');
+    // Create namespaced config
+    fs.mkdirSync(path.join(tmpDir, '.planning', 'test-proj'), { recursive: true });
+    fs.writeFileSync(
+      path.join(tmpDir, '.planning', 'test-proj', 'config.json'),
+      JSON.stringify({ model_profile: 'balanced' }, null, 2),
+      'utf-8'
+    );
+
+    const result = runGsdTools('config-set model_profile quality', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+
+    // Check the namespaced config was updated
+    const namespacedConfig = JSON.parse(
+      fs.readFileSync(path.join(tmpDir, '.planning', 'test-proj', 'config.json'), 'utf-8')
+    );
+    assert.strictEqual(namespacedConfig.model_profile, 'quality');
+  });
+
+  test('config-get reads from namespaced config when .active exists', () => {
+    // Write .active with slug
+    fs.writeFileSync(path.join(tmpDir, '.planning', '.active'), 'test-proj', 'utf-8');
+    // Create namespaced config with known value
+    fs.mkdirSync(path.join(tmpDir, '.planning', 'test-proj'), { recursive: true });
+    fs.writeFileSync(
+      path.join(tmpDir, '.planning', 'test-proj', 'config.json'),
+      JSON.stringify({ model_profile: 'quality' }, null, 2),
+      'utf-8'
+    );
+
+    const result = runGsdTools('config-get model_profile', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+
+    const value = JSON.parse(result.output);
+    assert.strictEqual(value, 'quality');
+  });
+});
