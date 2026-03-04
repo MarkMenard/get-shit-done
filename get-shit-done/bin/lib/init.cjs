@@ -5,13 +5,15 @@
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
-const { loadConfig, resolveModelInternal, findPhaseInternal, getRoadmapPhaseInternal, pathExistsInternal, generateSlugInternal, getMilestoneInfo, normalizePhaseName, toPosixPath, output, error } = require('./core.cjs');
+const { loadConfig, resolveModelInternal, findPhaseInternal, getRoadmapPhaseInternal, pathExistsInternal, generateSlugInternal, getMilestoneInfo, normalizePhaseName, toPosixPath, planningRoot, output, error } = require('./core.cjs');
 
 function cmdInitExecutePhase(cwd, phase, raw) {
   if (!phase) {
     error('phase required for init execute-phase');
   }
 
+  const root = planningRoot(cwd);
+  const rootRel = toPosixPath(path.relative(cwd, root));
   const config = loadConfig(cwd);
   const phaseInfo = findPhaseInternal(cwd, phase);
   const milestone = getMilestoneInfo(cwd);
@@ -24,6 +26,9 @@ function cmdInitExecutePhase(cwd, phase, raw) {
   const phase_req_ids = (reqExtracted && reqExtracted !== 'TBD') ? reqExtracted : null;
 
   const result = {
+    // Planning root
+    planning_root: rootRel,
+
     // Models
     executor_model: resolveModelInternal(cwd, 'gsd-executor'),
     verifier_model: resolveModelInternal(cwd, 'gsd-verifier'),
@@ -68,13 +73,13 @@ function cmdInitExecutePhase(cwd, phase, raw) {
     milestone_slug: generateSlugInternal(milestone.name),
 
     // File existence
-    state_exists: pathExistsInternal(cwd, '.planning/STATE.md'),
-    roadmap_exists: pathExistsInternal(cwd, '.planning/ROADMAP.md'),
-    config_exists: pathExistsInternal(cwd, '.planning/config.json'),
+    state_exists: pathExistsInternal(cwd, path.join(root, 'STATE.md')),
+    roadmap_exists: pathExistsInternal(cwd, path.join(root, 'ROADMAP.md')),
+    config_exists: pathExistsInternal(cwd, path.join(root, 'config.json')),
     // File paths
-    state_path: '.planning/STATE.md',
-    roadmap_path: '.planning/ROADMAP.md',
-    config_path: '.planning/config.json',
+    state_path: `${rootRel}/STATE.md`,
+    roadmap_path: `${rootRel}/ROADMAP.md`,
+    config_path: `${rootRel}/config.json`,
   };
 
   output(result, raw);
@@ -85,6 +90,8 @@ function cmdInitPlanPhase(cwd, phase, raw) {
     error('phase required for init plan-phase');
   }
 
+  const root = planningRoot(cwd);
+  const rootRel = toPosixPath(path.relative(cwd, root));
   const config = loadConfig(cwd);
   const phaseInfo = findPhaseInternal(cwd, phase);
 
@@ -96,6 +103,9 @@ function cmdInitPlanPhase(cwd, phase, raw) {
   const phase_req_ids = (reqExtracted && reqExtracted !== 'TBD') ? reqExtracted : null;
 
   const result = {
+    // Planning root
+    planning_root: rootRel,
+
     // Models
     researcher_model: resolveModelInternal(cwd, 'gsd-phase-researcher'),
     planner_model: resolveModelInternal(cwd, 'gsd-planner'),
@@ -123,13 +133,13 @@ function cmdInitPlanPhase(cwd, phase, raw) {
     plan_count: phaseInfo?.plans?.length || 0,
 
     // Environment
-    planning_exists: pathExistsInternal(cwd, '.planning'),
-    roadmap_exists: pathExistsInternal(cwd, '.planning/ROADMAP.md'),
+    planning_exists: pathExistsInternal(cwd, root),
+    roadmap_exists: pathExistsInternal(cwd, path.join(root, 'ROADMAP.md')),
 
     // File paths
-    state_path: '.planning/STATE.md',
-    roadmap_path: '.planning/ROADMAP.md',
-    requirements_path: '.planning/REQUIREMENTS.md',
+    state_path: `${rootRel}/STATE.md`,
+    roadmap_path: `${rootRel}/ROADMAP.md`,
+    requirements_path: `${rootRel}/REQUIREMENTS.md`,
   };
 
   if (phaseInfo?.directory) {
@@ -160,6 +170,8 @@ function cmdInitPlanPhase(cwd, phase, raw) {
 }
 
 function cmdInitNewProject(cwd, raw) {
+  const root = planningRoot(cwd);
+  const rootRel = toPosixPath(path.relative(cwd, root));
   const config = loadConfig(cwd);
 
   // Detect Brave Search API key availability
@@ -186,6 +198,9 @@ function cmdInitNewProject(cwd, raw) {
                    pathExistsInternal(cwd, 'Package.swift');
 
   const result = {
+    // Planning root
+    planning_root: rootRel,
+
     // Models
     researcher_model: resolveModelInternal(cwd, 'gsd-project-researcher'),
     synthesizer_model: resolveModelInternal(cwd, 'gsd-research-synthesizer'),
@@ -195,15 +210,15 @@ function cmdInitNewProject(cwd, raw) {
     commit_docs: config.commit_docs,
 
     // Existing state
-    project_exists: pathExistsInternal(cwd, '.planning/PROJECT.md'),
-    has_codebase_map: pathExistsInternal(cwd, '.planning/codebase'),
-    planning_exists: pathExistsInternal(cwd, '.planning'),
+    project_exists: pathExistsInternal(cwd, path.join(root, 'PROJECT.md')),
+    has_codebase_map: pathExistsInternal(cwd, path.join(root, 'codebase')),
+    planning_exists: pathExistsInternal(cwd, root),
 
     // Brownfield detection
     has_existing_code: hasCode,
     has_package_file: hasPackageFile,
     is_brownfield: hasCode || hasPackageFile,
-    needs_codebase_map: (hasCode || hasPackageFile) && !pathExistsInternal(cwd, '.planning/codebase'),
+    needs_codebase_map: (hasCode || hasPackageFile) && !pathExistsInternal(cwd, path.join(root, 'codebase')),
 
     // Git state
     has_git: pathExistsInternal(cwd, '.git'),
@@ -212,17 +227,22 @@ function cmdInitNewProject(cwd, raw) {
     brave_search_available: hasBraveSearch,
 
     // File paths
-    project_path: '.planning/PROJECT.md',
+    project_path: `${rootRel}/PROJECT.md`,
   };
 
   output(result, raw);
 }
 
 function cmdInitNewMilestone(cwd, raw) {
+  const root = planningRoot(cwd);
+  const rootRel = toPosixPath(path.relative(cwd, root));
   const config = loadConfig(cwd);
   const milestone = getMilestoneInfo(cwd);
 
   const result = {
+    // Planning root
+    planning_root: rootRel,
+
     // Models
     researcher_model: resolveModelInternal(cwd, 'gsd-project-researcher'),
     synthesizer_model: resolveModelInternal(cwd, 'gsd-research-synthesizer'),
@@ -237,26 +257,28 @@ function cmdInitNewMilestone(cwd, raw) {
     current_milestone_name: milestone.name,
 
     // File existence
-    project_exists: pathExistsInternal(cwd, '.planning/PROJECT.md'),
-    roadmap_exists: pathExistsInternal(cwd, '.planning/ROADMAP.md'),
-    state_exists: pathExistsInternal(cwd, '.planning/STATE.md'),
+    project_exists: pathExistsInternal(cwd, path.join(root, 'PROJECT.md')),
+    roadmap_exists: pathExistsInternal(cwd, path.join(root, 'ROADMAP.md')),
+    state_exists: pathExistsInternal(cwd, path.join(root, 'STATE.md')),
 
     // File paths
-    project_path: '.planning/PROJECT.md',
-    roadmap_path: '.planning/ROADMAP.md',
-    state_path: '.planning/STATE.md',
+    project_path: `${rootRel}/PROJECT.md`,
+    roadmap_path: `${rootRel}/ROADMAP.md`,
+    state_path: `${rootRel}/STATE.md`,
   };
 
   output(result, raw);
 }
 
 function cmdInitQuick(cwd, description, raw) {
+  const root = planningRoot(cwd);
+  const rootRel = toPosixPath(path.relative(cwd, root));
   const config = loadConfig(cwd);
   const now = new Date();
   const slug = description ? generateSlugInternal(description)?.substring(0, 40) : null;
 
   // Find next quick task number
-  const quickDir = path.join(cwd, '.planning', 'quick');
+  const quickDir = path.join(root, 'quick');
   let nextNum = 1;
   try {
     const existing = fs.readdirSync(quickDir)
@@ -269,6 +291,9 @@ function cmdInitQuick(cwd, description, raw) {
   } catch {}
 
   const result = {
+    // Planning root
+    planning_root: rootRel,
+
     // Models
     planner_model: resolveModelInternal(cwd, 'gsd-planner'),
     executor_model: resolveModelInternal(cwd, 'gsd-executor'),
@@ -288,12 +313,12 @@ function cmdInitQuick(cwd, description, raw) {
     timestamp: now.toISOString(),
 
     // Paths
-    quick_dir: '.planning/quick',
-    task_dir: slug ? `.planning/quick/${nextNum}-${slug}` : null,
+    quick_dir: `${rootRel}/quick`,
+    task_dir: slug ? `${rootRel}/quick/${nextNum}-${slug}` : null,
 
     // File existence
-    roadmap_exists: pathExistsInternal(cwd, '.planning/ROADMAP.md'),
-    planning_exists: pathExistsInternal(cwd, '.planning'),
+    roadmap_exists: pathExistsInternal(cwd, path.join(root, 'ROADMAP.md')),
+    planning_exists: pathExistsInternal(cwd, root),
 
   };
 
@@ -301,25 +326,30 @@ function cmdInitQuick(cwd, description, raw) {
 }
 
 function cmdInitResume(cwd, raw) {
+  const root = planningRoot(cwd);
+  const rootRel = toPosixPath(path.relative(cwd, root));
   const config = loadConfig(cwd);
 
   // Check for interrupted agent
   let interruptedAgentId = null;
   try {
-    interruptedAgentId = fs.readFileSync(path.join(cwd, '.planning', 'current-agent-id.txt'), 'utf-8').trim();
+    interruptedAgentId = fs.readFileSync(path.join(root, 'current-agent-id.txt'), 'utf-8').trim();
   } catch {}
 
   const result = {
+    // Planning root
+    planning_root: rootRel,
+
     // File existence
-    state_exists: pathExistsInternal(cwd, '.planning/STATE.md'),
-    roadmap_exists: pathExistsInternal(cwd, '.planning/ROADMAP.md'),
-    project_exists: pathExistsInternal(cwd, '.planning/PROJECT.md'),
-    planning_exists: pathExistsInternal(cwd, '.planning'),
+    state_exists: pathExistsInternal(cwd, path.join(root, 'STATE.md')),
+    roadmap_exists: pathExistsInternal(cwd, path.join(root, 'ROADMAP.md')),
+    project_exists: pathExistsInternal(cwd, path.join(root, 'PROJECT.md')),
+    planning_exists: pathExistsInternal(cwd, root),
 
     // File paths
-    state_path: '.planning/STATE.md',
-    roadmap_path: '.planning/ROADMAP.md',
-    project_path: '.planning/PROJECT.md',
+    state_path: `${rootRel}/STATE.md`,
+    roadmap_path: `${rootRel}/ROADMAP.md`,
+    project_path: `${rootRel}/PROJECT.md`,
 
     // Agent state
     has_interrupted_agent: !!interruptedAgentId,
@@ -337,10 +367,15 @@ function cmdInitVerifyWork(cwd, phase, raw) {
     error('phase required for init verify-work');
   }
 
+  const root = planningRoot(cwd);
+  const rootRel = toPosixPath(path.relative(cwd, root));
   const config = loadConfig(cwd);
   const phaseInfo = findPhaseInternal(cwd, phase);
 
   const result = {
+    // Planning root
+    planning_root: rootRel,
+
     // Models
     planner_model: resolveModelInternal(cwd, 'gsd-planner'),
     checker_model: resolveModelInternal(cwd, 'gsd-plan-checker'),
@@ -362,6 +397,8 @@ function cmdInitVerifyWork(cwd, phase, raw) {
 }
 
 function cmdInitPhaseOp(cwd, phase, raw) {
+  const root = planningRoot(cwd);
+  const rootRel = toPosixPath(path.relative(cwd, root));
   const config = loadConfig(cwd);
   let phaseInfo = findPhaseInternal(cwd, phase);
 
@@ -387,6 +424,9 @@ function cmdInitPhaseOp(cwd, phase, raw) {
   }
 
   const result = {
+    // Planning root
+    planning_root: rootRel,
+
     // Config
     commit_docs: config.commit_docs,
     brave_search: config.brave_search,
@@ -407,13 +447,13 @@ function cmdInitPhaseOp(cwd, phase, raw) {
     plan_count: phaseInfo?.plans?.length || 0,
 
     // File existence
-    roadmap_exists: pathExistsInternal(cwd, '.planning/ROADMAP.md'),
-    planning_exists: pathExistsInternal(cwd, '.planning'),
+    roadmap_exists: pathExistsInternal(cwd, path.join(root, 'ROADMAP.md')),
+    planning_exists: pathExistsInternal(cwd, root),
 
     // File paths
-    state_path: '.planning/STATE.md',
-    roadmap_path: '.planning/ROADMAP.md',
-    requirements_path: '.planning/REQUIREMENTS.md',
+    state_path: `${rootRel}/STATE.md`,
+    roadmap_path: `${rootRel}/ROADMAP.md`,
+    requirements_path: `${rootRel}/REQUIREMENTS.md`,
   };
 
   if (phaseInfo?.directory) {
@@ -443,11 +483,13 @@ function cmdInitPhaseOp(cwd, phase, raw) {
 }
 
 function cmdInitTodos(cwd, area, raw) {
+  const root = planningRoot(cwd);
+  const rootRel = toPosixPath(path.relative(cwd, root));
   const config = loadConfig(cwd);
   const now = new Date();
 
   // List todos (reuse existing logic)
-  const pendingDir = path.join(cwd, '.planning', 'todos', 'pending');
+  const pendingDir = path.join(root, 'todos', 'pending');
   let count = 0;
   const todos = [];
 
@@ -469,13 +511,16 @@ function cmdInitTodos(cwd, area, raw) {
           created: createdMatch ? createdMatch[1].trim() : 'unknown',
           title: titleMatch ? titleMatch[1].trim() : 'Untitled',
           area: todoArea,
-          path: '.planning/todos/pending/' + file,
+          path: `${rootRel}/todos/pending/` + file,
         });
       } catch {}
     }
   } catch {}
 
   const result = {
+    // Planning root
+    planning_root: rootRel,
+
     // Config
     commit_docs: config.commit_docs,
 
@@ -489,26 +534,28 @@ function cmdInitTodos(cwd, area, raw) {
     area_filter: area || null,
 
     // Paths
-    pending_dir: '.planning/todos/pending',
-    completed_dir: '.planning/todos/completed',
+    pending_dir: `${rootRel}/todos/pending`,
+    completed_dir: `${rootRel}/todos/completed`,
 
     // File existence
-    planning_exists: pathExistsInternal(cwd, '.planning'),
-    todos_dir_exists: pathExistsInternal(cwd, '.planning/todos'),
-    pending_dir_exists: pathExistsInternal(cwd, '.planning/todos/pending'),
+    planning_exists: pathExistsInternal(cwd, root),
+    todos_dir_exists: pathExistsInternal(cwd, path.join(root, 'todos')),
+    pending_dir_exists: pathExistsInternal(cwd, path.join(root, 'todos', 'pending')),
   };
 
   output(result, raw);
 }
 
 function cmdInitMilestoneOp(cwd, raw) {
+  const root = planningRoot(cwd);
+  const rootRel = toPosixPath(path.relative(cwd, root));
   const config = loadConfig(cwd);
   const milestone = getMilestoneInfo(cwd);
 
   // Count phases
   let phaseCount = 0;
   let completedPhases = 0;
-  const phasesDir = path.join(cwd, '.planning', 'phases');
+  const phasesDir = path.join(root, 'phases');
   try {
     const entries = fs.readdirSync(phasesDir, { withFileTypes: true });
     const dirs = entries.filter(e => e.isDirectory()).map(e => e.name);
@@ -525,7 +572,7 @@ function cmdInitMilestoneOp(cwd, raw) {
   } catch {}
 
   // Check archive
-  const archiveDir = path.join(cwd, '.planning', 'archive');
+  const archiveDir = path.join(root, 'archive');
   let archivedMilestones = [];
   try {
     archivedMilestones = fs.readdirSync(archiveDir, { withFileTypes: true })
@@ -534,6 +581,9 @@ function cmdInitMilestoneOp(cwd, raw) {
   } catch {}
 
   const result = {
+    // Planning root
+    planning_root: rootRel,
+
     // Config
     commit_docs: config.commit_docs,
 
@@ -552,27 +602,32 @@ function cmdInitMilestoneOp(cwd, raw) {
     archive_count: archivedMilestones.length,
 
     // File existence
-    project_exists: pathExistsInternal(cwd, '.planning/PROJECT.md'),
-    roadmap_exists: pathExistsInternal(cwd, '.planning/ROADMAP.md'),
-    state_exists: pathExistsInternal(cwd, '.planning/STATE.md'),
-    archive_exists: pathExistsInternal(cwd, '.planning/archive'),
-    phases_dir_exists: pathExistsInternal(cwd, '.planning/phases'),
+    project_exists: pathExistsInternal(cwd, path.join(root, 'PROJECT.md')),
+    roadmap_exists: pathExistsInternal(cwd, path.join(root, 'ROADMAP.md')),
+    state_exists: pathExistsInternal(cwd, path.join(root, 'STATE.md')),
+    archive_exists: pathExistsInternal(cwd, path.join(root, 'archive')),
+    phases_dir_exists: pathExistsInternal(cwd, path.join(root, 'phases')),
   };
 
   output(result, raw);
 }
 
 function cmdInitMapCodebase(cwd, raw) {
+  const root = planningRoot(cwd);
+  const rootRel = toPosixPath(path.relative(cwd, root));
   const config = loadConfig(cwd);
 
   // Check for existing codebase maps
-  const codebaseDir = path.join(cwd, '.planning', 'codebase');
+  const codebaseDir = path.join(root, 'codebase');
   let existingMaps = [];
   try {
     existingMaps = fs.readdirSync(codebaseDir).filter(f => f.endsWith('.md'));
   } catch {}
 
   const result = {
+    // Planning root
+    planning_root: rootRel,
+
     // Models
     mapper_model: resolveModelInternal(cwd, 'gsd-codebase-mapper'),
 
@@ -582,26 +637,28 @@ function cmdInitMapCodebase(cwd, raw) {
     parallelization: config.parallelization,
 
     // Paths
-    codebase_dir: '.planning/codebase',
+    codebase_dir: `${rootRel}/codebase`,
 
     // Existing maps
     existing_maps: existingMaps,
     has_maps: existingMaps.length > 0,
 
     // File existence
-    planning_exists: pathExistsInternal(cwd, '.planning'),
-    codebase_dir_exists: pathExistsInternal(cwd, '.planning/codebase'),
+    planning_exists: pathExistsInternal(cwd, root),
+    codebase_dir_exists: pathExistsInternal(cwd, path.join(root, 'codebase')),
   };
 
   output(result, raw);
 }
 
 function cmdInitProgress(cwd, raw) {
+  const root = planningRoot(cwd);
+  const rootRel = toPosixPath(path.relative(cwd, root));
   const config = loadConfig(cwd);
   const milestone = getMilestoneInfo(cwd);
 
   // Analyze phases
-  const phasesDir = path.join(cwd, '.planning', 'phases');
+  const phasesDir = path.join(root, 'phases');
   const phases = [];
   let currentPhase = null;
   let nextPhase = null;
@@ -629,7 +686,7 @@ function cmdInitProgress(cwd, raw) {
       const phaseInfo = {
         number: phaseNumber,
         name: phaseName,
-        directory: '.planning/phases/' + dir,
+        directory: `${rootRel}/phases/` + dir,
         status,
         plan_count: plans.length,
         summary_count: summaries.length,
@@ -651,12 +708,15 @@ function cmdInitProgress(cwd, raw) {
   // Check for paused work
   let pausedAt = null;
   try {
-    const state = fs.readFileSync(path.join(cwd, '.planning', 'STATE.md'), 'utf-8');
+    const state = fs.readFileSync(path.join(root, 'STATE.md'), 'utf-8');
     const pauseMatch = state.match(/\*\*Paused At:\*\*\s*(.+)/);
     if (pauseMatch) pausedAt = pauseMatch[1].trim();
   } catch {}
 
   const result = {
+    // Planning root
+    planning_root: rootRel,
+
     // Models
     executor_model: resolveModelInternal(cwd, 'gsd-executor'),
     planner_model: resolveModelInternal(cwd, 'gsd-planner'),
@@ -681,14 +741,14 @@ function cmdInitProgress(cwd, raw) {
     has_work_in_progress: !!currentPhase,
 
     // File existence
-    project_exists: pathExistsInternal(cwd, '.planning/PROJECT.md'),
-    roadmap_exists: pathExistsInternal(cwd, '.planning/ROADMAP.md'),
-    state_exists: pathExistsInternal(cwd, '.planning/STATE.md'),
+    project_exists: pathExistsInternal(cwd, path.join(root, 'PROJECT.md')),
+    roadmap_exists: pathExistsInternal(cwd, path.join(root, 'ROADMAP.md')),
+    state_exists: pathExistsInternal(cwd, path.join(root, 'STATE.md')),
     // File paths
-    state_path: '.planning/STATE.md',
-    roadmap_path: '.planning/ROADMAP.md',
-    project_path: '.planning/PROJECT.md',
-    config_path: '.planning/config.json',
+    state_path: `${rootRel}/STATE.md`,
+    roadmap_path: `${rootRel}/ROADMAP.md`,
+    project_path: `${rootRel}/PROJECT.md`,
+    config_path: `${rootRel}/config.json`,
   };
 
   output(result, raw);

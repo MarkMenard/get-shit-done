@@ -26,6 +26,7 @@ const {
   getRoadmapPhaseInternal,
   searchPhaseInDir,
   findPhaseInternal,
+  getArchivedPhaseDirs,
   planningRoot,
   writeActiveFile,
 } = require('../get-shit-done/bin/lib/core.cjs');
