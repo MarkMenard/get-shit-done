@@ -163,8 +163,34 @@ function cmdConfigGet(cwd, keyPath, raw) {
   output(current, raw, String(current));
 }
 
+function cmdActiveSet(cwd, slug, raw) {
+  if (!slug) {
+    error('Usage: active-set <slug>');
+  }
+  const { writeActiveFile } = require('./core.cjs');
+  writeActiveFile(cwd, slug);
+
+  // Also ensure .planning/.gitignore includes .active
+  const gitignorePath = path.join(cwd, '.planning', '.gitignore');
+  let gitignoreContent = '';
+  try {
+    if (fs.existsSync(gitignorePath)) {
+      gitignoreContent = fs.readFileSync(gitignorePath, 'utf-8');
+    }
+  } catch {}
+  if (!gitignoreContent.includes('.active')) {
+    const newContent = gitignoreContent
+      ? (gitignoreContent.endsWith('\n') ? gitignoreContent : gitignoreContent + '\n') + '.active\n'
+      : '.active\n';
+    fs.writeFileSync(gitignorePath, newContent, 'utf-8');
+  }
+
+  output({ set: true, slug }, raw, slug);
+}
+
 module.exports = {
   cmdConfigEnsureSection,
   cmdConfigSet,
   cmdConfigGet,
+  cmdActiveSet,
 };

@@ -382,6 +382,11 @@ async function main() {
       break;
     }
 
+    case 'active-set': {
+      config.cmdActiveSet(cwd, args[1], raw);
+      break;
+    }
+
     case 'history-digest': {
       commands.cmdHistoryDigest(cwd, raw);
       break;
