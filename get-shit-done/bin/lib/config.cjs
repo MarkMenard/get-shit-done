@@ -4,11 +4,11 @@
 
 const fs = require('fs');
 const path = require('path');
-const { output, error } = require('./core.cjs');
+const { output, error, planningRoot } = require('./core.cjs');
 
 function cmdConfigEnsureSection(cwd, raw) {
-  const configPath = path.join(cwd, '.planning', 'config.json');
-  const planningDir = path.join(cwd, '.planning');
+  const planningDir = planningRoot(cwd);
+  const configPath = path.join(planningDir, 'config.json');
 
   // Ensure .planning directory exists
   try {
@@ -51,6 +51,7 @@ function cmdConfigEnsureSection(cwd, raw) {
 
   // Create default config (user-level defaults override hardcoded defaults)
   const hardcoded = {
+    project_slug: null,
     model_profile: 'balanced',
     commit_docs: true,
     search_gitignored: false,
@@ -82,7 +83,7 @@ function cmdConfigEnsureSection(cwd, raw) {
 }
 
 function cmdConfigSet(cwd, keyPath, value, raw) {
-  const configPath = path.join(cwd, '.planning', 'config.json');
+  const configPath = path.join(planningRoot(cwd), 'config.json');
 
   if (!keyPath) {
     error('Usage: config-set <key.path> <value>');
@@ -127,7 +128,7 @@ function cmdConfigSet(cwd, keyPath, value, raw) {
 }
 
 function cmdConfigGet(cwd, keyPath, raw) {
-  const configPath = path.join(cwd, '.planning', 'config.json');
+  const configPath = path.join(planningRoot(cwd), 'config.json');
 
   if (!keyPath) {
     error('Usage: config-get <key.path>');

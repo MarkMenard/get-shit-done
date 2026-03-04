@@ -96,7 +96,7 @@ function writeActiveFile(cwd, slug) {
 }
 
 function loadConfig(cwd) {
-  const configPath = path.join(cwd, '.planning', 'config.json');
+  const configPath = path.join(planningRoot(cwd), 'config.json');
   const defaults = {
     model_profile: 'balanced',
     commit_docs: true,
