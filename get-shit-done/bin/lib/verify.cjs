@@ -4,7 +4,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { safeReadFile, normalizePhaseName, execGit, findPhaseInternal, getMilestoneInfo, output, error } = require('./core.cjs');
+const { safeReadFile, normalizePhaseName, execGit, findPhaseInternal, getMilestoneInfo, planningRoot, output, error } = require('./core.cjs');
 const { extractFrontmatter, parseMustHavesBlock } = require('./frontmatter.cjs');
 const { writeStateMd } = require('./state.cjs');
 
@@ -395,8 +395,9 @@ function cmdVerifyKeyLinks(cwd, planFilePath, raw) {
 }
 
 function cmdValidateConsistency(cwd, raw) {
-  const roadmapPath = path.join(cwd, '.planning', 'ROADMAP.md');
-  const phasesDir = path.join(cwd, '.planning', 'phases');
+  const root = planningRoot(cwd);
+  const roadmapPath = path.join(root, 'ROADMAP.md');
+  const phasesDir = path.join(root, 'phases');
   const errors = [];
   const warnings = [];
 
@@ -515,7 +516,7 @@ function cmdValidateConsistency(cwd, raw) {
 }
 
 function cmdValidateHealth(cwd, options, raw) {
-  const planningDir = path.join(cwd, '.planning');
+  const planningDir = planningRoot(cwd);
   const projectPath = path.join(planningDir, 'PROJECT.md');
   const roadmapPath = path.join(planningDir, 'ROADMAP.md');
   const statePath = path.join(planningDir, 'STATE.md');

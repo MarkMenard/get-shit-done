@@ -1430,7 +1430,7 @@ describe('namespace-aware state', () => {
       `# State\n\n**Status:** Before patch\n`
     );
 
-    const result = runGsdTools(['state', 'patch', JSON.stringify({ Status: 'After patch' })], tmpDir);
+    const result = runGsdTools(['state', 'patch', '--Status', 'After patch'], tmpDir);
     assert.ok(result.success, `Command failed: ${result.error}`);
 
     const output = JSON.parse(result.output);
