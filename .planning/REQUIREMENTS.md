@@ -33,7 +33,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [x] **TOOL-01**: All bin/lib/*.cjs files (init.cjs, core.cjs, phase.cjs, etc.) use `planningRoot` for path construction
 - [x] **TOOL-02**: gsd-tools.js (main entry, 4,781 lines) routes all path references through resolution
-- [ ] **TOOL-03**: Phase operations (next-decimal, add, insert, remove, complete) use resolved paths
+- [x] **TOOL-03**: Phase operations (next-decimal, add, insert, remove, complete) use resolved paths
 - [ ] **TOOL-04**: Roadmap operations (get-phase, analyze, update-plan-progress) use resolved paths
 - [ ] **TOOL-05**: Milestone operations use resolved paths for archiving
 
@@ -87,7 +87,7 @@ Requirements for initial release. Each maps to roadmap phases.
 | WORK-04 | Phase 3 | Pending |
 | TOOL-01 | Phase 2 | Complete |
 | TOOL-02 | Phase 2 | Complete |
-| TOOL-03 | Phase 2 | Pending |
+| TOOL-03 | Phase 2 | Complete |
 | TOOL-04 | Phase 2 | Pending |
 | TOOL-05 | Phase 2 | Pending |
 | MULT-01 | Phase 5 | Pending |
