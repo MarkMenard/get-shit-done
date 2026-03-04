@@ -45,12 +45,12 @@ Plans:
   3. Roadmap operations (get-phase, analyze, update-plan-progress) read/write from the namespaced directory
   4. Milestone operations archive to/from the namespaced directory
   5. gsd-tools.js main entry routes all path references through resolution (no remaining hardcoded `.planning/` in bin/lib)
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 02-01: TBD
-- [ ] 02-02: TBD
-- [ ] 02-03: TBD
+- [ ] 02-01: core.cjs helpers + init.cjs namespace-awareness (TDD) -- PATH-02, TOOL-01, TOOL-02
+- [ ] 02-02: phase.cjs namespace-awareness (TDD) -- TOOL-03
+- [ ] 02-03: roadmap.cjs + milestone.cjs + state.cjs + commands.cjs namespace-awareness (TDD) -- PATH-05, TOOL-04, TOOL-05
 
 ### Phase 3: Workflow Updates
 **Goal**: All workflow files and agent prompt templates consume paths from init output, never hardcoded strings
