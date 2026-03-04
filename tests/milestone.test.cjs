@@ -606,6 +606,101 @@ describe('requirements mark-complete command', () => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
+// namespace-aware milestone
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('namespace-aware milestone', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = createTempProject();
+    // Set up namespace: .planning/.active = 'my-project'
+    fs.writeFileSync(path.join(tmpDir, '.planning', '.active'), 'my-project');
+    // Create namespaced directory structure
+    fs.mkdirSync(path.join(tmpDir, '.planning', 'my-project', 'phases'), { recursive: true });
+  });
+
+  afterEach(() => {
+    cleanup(tmpDir);
+  });
+
+  test('cmdRequirementsMarkComplete reads/writes REQUIREMENTS.md from namespaced directory', () => {
+    // Write REQUIREMENTS.md in namespaced dir only
+    fs.writeFileSync(
+      path.join(tmpDir, '.planning', 'my-project', 'REQUIREMENTS.md'),
+      `# Requirements\n\n- [ ] **NS-01**: namespace requirement\n\n## Traceability\n\n| Requirement | Phase | Status |\n|-------------|-------|--------|\n| NS-01 | Phase 1 | Pending |\n`
+    );
+
+    const result = runGsdTools('requirements mark-complete NS-01', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+
+    const output = JSON.parse(result.output);
+    assert.strictEqual(output.updated, true, 'should update namespaced REQUIREMENTS.md');
+    assert.ok(output.marked_complete.includes('NS-01'), 'NS-01 should be marked complete');
+
+    // Verify the namespaced file was modified
+    const reqContent = fs.readFileSync(
+      path.join(tmpDir, '.planning', 'my-project', 'REQUIREMENTS.md'), 'utf-8'
+    );
+    assert.ok(reqContent.includes('- [x] **NS-01**'), 'checkbox should be checked in namespaced file');
+    assert.ok(
+      !fs.existsSync(path.join(tmpDir, '.planning', 'REQUIREMENTS.md')),
+      'flat .planning/REQUIREMENTS.md should not exist'
+    );
+  });
+
+  test('cmdMilestoneComplete reads ROADMAP.md and creates archive under namespaced milestones/', () => {
+    fs.writeFileSync(
+      path.join(tmpDir, '.planning', 'my-project', 'ROADMAP.md'),
+      `# Roadmap v1.0\n\n### Phase 1: NS Foundation\n**Goal:** Namespace setup\n`
+    );
+    fs.writeFileSync(
+      path.join(tmpDir, '.planning', 'my-project', 'STATE.md'),
+      `# State\n\n**Status:** In progress\n**Last Activity:** 2025-01-01\n**Last Activity Description:** Working\n`
+    );
+
+    const result = runGsdTools('milestone complete v1.0 --name NSMilestone', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+
+    const output = JSON.parse(result.output);
+    assert.strictEqual(output.version, 'v1.0');
+    assert.ok(output.archived.roadmap, 'roadmap should be archived');
+
+    // Verify archive exists in namespaced milestones dir
+    assert.ok(
+      fs.existsSync(path.join(tmpDir, '.planning', 'my-project', 'milestones', 'v1.0-ROADMAP.md')),
+      'archived roadmap should be in namespaced milestones dir'
+    );
+    assert.ok(
+      !fs.existsSync(path.join(tmpDir, '.planning', 'milestones', 'v1.0-ROADMAP.md')),
+      'archived roadmap should NOT be in flat .planning/milestones/'
+    );
+  });
+
+  test('backward compat: no .active uses flat .planning/ for requirements', () => {
+    // Remove .active file
+    fs.unlinkSync(path.join(tmpDir, '.planning', '.active'));
+
+    // Write REQUIREMENTS.md in flat .planning/
+    fs.writeFileSync(
+      path.join(tmpDir, '.planning', 'REQUIREMENTS.md'),
+      `# Requirements\n\n- [ ] **FLAT-01**: flat layout requirement\n\n## Traceability\n\n| Requirement | Phase | Status |\n|-------------|-------|--------|\n| FLAT-01 | Phase 1 | Pending |\n`
+    );
+
+    const result = runGsdTools('requirements mark-complete FLAT-01', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+
+    const output = JSON.parse(result.output);
+    assert.strictEqual(output.updated, true, 'flat layout should still work');
+
+    const reqContent = fs.readFileSync(
+      path.join(tmpDir, '.planning', 'REQUIREMENTS.md'), 'utf-8'
+    );
+    assert.ok(reqContent.includes('- [x] **FLAT-01**'), 'flat layout checkbox should be checked');
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
 // validate consistency command
 // ─────────────────────────────────────────────────────────────────────────────
 

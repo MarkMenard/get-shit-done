@@ -1374,5 +1374,105 @@ describe('milestone-scoped phase counting in frontmatter', () => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
+// namespace-aware state
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('namespace-aware state', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = createTempProject();
+    // Set up namespace: .planning/.active = 'my-project'
+    fs.writeFileSync(path.join(tmpDir, '.planning', '.active'), 'my-project');
+    // Create namespaced directory structure
+    fs.mkdirSync(path.join(tmpDir, '.planning', 'my-project', 'phases'), { recursive: true });
+  });
+
+  afterEach(() => {
+    cleanup(tmpDir);
+  });
+
+  test('cmdStateLoad reads STATE.md from namespaced directory', () => {
+    // Write STATE.md in namespaced dir only
+    fs.writeFileSync(
+      path.join(tmpDir, '.planning', 'my-project', 'STATE.md'),
+      `# State\n\n**Status:** In progress\n**Current Phase:** 01\n`
+    );
+
+    const result = runGsdTools('state load', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+
+    const output = JSON.parse(result.output);
+    assert.strictEqual(output.state_exists, true, 'STATE.md should be found in namespaced dir');
+    assert.ok(output.state_raw.includes('In progress'), 'state_raw should contain namespaced STATE.md content');
+    assert.ok(
+      !fs.existsSync(path.join(tmpDir, '.planning', 'STATE.md')),
+      'flat .planning/STATE.md should not exist'
+    );
+  });
+
+  test('cmdStateGet reads sections from namespaced STATE.md', () => {
+    fs.writeFileSync(
+      path.join(tmpDir, '.planning', 'my-project', 'STATE.md'),
+      `# State\n\n**Status:** Namespace active\n**Current Phase:** 02\n`
+    );
+
+    const result = runGsdTools('state get Status', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+
+    const output = JSON.parse(result.output);
+    assert.strictEqual(output.Status, 'Namespace active', 'Status should be read from namespaced STATE.md');
+  });
+
+  test('cmdStatePatch writes to namespaced STATE.md', () => {
+    fs.writeFileSync(
+      path.join(tmpDir, '.planning', 'my-project', 'STATE.md'),
+      `# State\n\n**Status:** Before patch\n`
+    );
+
+    const result = runGsdTools(['state', 'patch', JSON.stringify({ Status: 'After patch' })], tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+
+    const output = JSON.parse(result.output);
+    assert.ok(output.updated.includes('Status'), 'Status should be in updated list');
+
+    // Verify namespaced file was modified
+    const stateContent = fs.readFileSync(
+      path.join(tmpDir, '.planning', 'my-project', 'STATE.md'), 'utf-8'
+    );
+    assert.ok(stateContent.includes('After patch'), 'namespaced STATE.md should have patched value');
+  });
+
+  test('cmdStateJson reads from namespaced STATE.md', () => {
+    fs.writeFileSync(
+      path.join(tmpDir, '.planning', 'my-project', 'STATE.md'),
+      `---\ngsd_state_version: "1.0"\nstatus: executing\n---\n\n# State\n\n**Status:** In progress\n`
+    );
+
+    const result = runGsdTools('state json', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+
+    const output = JSON.parse(result.output);
+    assert.ok(output.gsd_state_version, 'should return frontmatter from namespaced STATE.md');
+  });
+
+  test('backward compat: no .active uses flat .planning/STATE.md', () => {
+    // Remove .active file
+    fs.unlinkSync(path.join(tmpDir, '.planning', '.active'));
+
+    fs.writeFileSync(
+      path.join(tmpDir, '.planning', 'STATE.md'),
+      `# State\n\n**Status:** Flat layout\n`
+    );
+
+    const result = runGsdTools('state get Status', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+
+    const output = JSON.parse(result.output);
+    assert.strictEqual(output.Status, 'Flat layout', 'flat layout STATE.md should be read');
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
 // summary-extract command
 // ─────────────────────────────────────────────────────────────────────────────

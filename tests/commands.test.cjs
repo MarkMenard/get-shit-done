@@ -1186,3 +1186,96 @@ describe('websearch command', () => {
     assert.strictEqual(output.error, 'Network timeout');
   });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// namespace-aware commands
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('namespace-aware commands', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = createTempProject();
+    // Set up namespace: .planning/.active = 'my-project'
+    fs.writeFileSync(path.join(tmpDir, '.planning', '.active'), 'my-project');
+    // Create namespaced directory structure
+    fs.mkdirSync(path.join(tmpDir, '.planning', 'my-project', 'phases'), { recursive: true });
+  });
+
+  afterEach(() => {
+    cleanup(tmpDir);
+  });
+
+  test('cmdListTodos searches namespaced todos/pending/ directory', () => {
+    // Create namespaced todos dir with a todo file
+    const pendingDir = path.join(tmpDir, '.planning', 'my-project', 'todos', 'pending');
+    fs.mkdirSync(pendingDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(pendingDir, 'todo-001.md'),
+      `title: Namespace Todo\ncreated: 2025-01-01\narea: testing\n\nThis is a test todo.\n`
+    );
+
+    const result = runGsdTools('list-todos', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+
+    const output = JSON.parse(result.output);
+    assert.strictEqual(output.count, 1, 'should find 1 todo in namespaced dir');
+    assert.strictEqual(output.todos[0].title, 'Namespace Todo', 'should have correct title');
+  });
+
+  test('cmdHistoryDigest reads summaries from namespaced phases/', () => {
+    // Create a summary in namespaced phases dir
+    const phaseDir = path.join(tmpDir, '.planning', 'my-project', 'phases', '01-ns-foundation');
+    fs.mkdirSync(phaseDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(phaseDir, '01-01-SUMMARY.md'),
+      `---\nphase: "01"\nname: "NS Foundation"\ndependency-graph:\n  provides:\n    - "Namespace routing"\nkey-decisions:\n  - "Use namespace approach"\n---\n\n# Summary\n`
+    );
+
+    const result = runGsdTools('history-digest', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+
+    const output = JSON.parse(result.output);
+    assert.ok(output.phases['01'], 'should find phase 01 from namespaced phases/');
+    assert.ok(output.phases['01'].provides.includes('Namespace routing'), 'provides from namespaced summary');
+    assert.strictEqual(output.decisions.length, 1, 'should have 1 decision from namespaced summary');
+  });
+
+  test('cmdScaffold creates files under namespaced .planning/ directory', () => {
+    // Create namespaced phase dir for scaffolding
+    const phaseDir = path.join(tmpDir, '.planning', 'my-project', 'phases', '01-ns-phase');
+    fs.mkdirSync(phaseDir, { recursive: true });
+
+    const result = runGsdTools('scaffold context --phase 1', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+
+    const output = JSON.parse(result.output);
+    assert.strictEqual(output.created, true, 'context file should be created');
+
+    // Verify file was created in namespaced dir
+    assert.ok(
+      fs.existsSync(path.join(tmpDir, '.planning', 'my-project', 'phases', '01-ns-phase', '01-CONTEXT.md')),
+      'context file should be created in namespaced phase dir'
+    );
+  });
+
+  test('backward compat: no .active uses flat .planning/ for todos', () => {
+    // Remove .active file
+    fs.unlinkSync(path.join(tmpDir, '.planning', '.active'));
+
+    // Create flat todos dir
+    const pendingDir = path.join(tmpDir, '.planning', 'todos', 'pending');
+    fs.mkdirSync(pendingDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(pendingDir, 'flat-todo.md'),
+      `title: Flat Todo\ncreated: 2025-01-01\narea: testing\n`
+    );
+
+    const result = runGsdTools('list-todos', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+
+    const output = JSON.parse(result.output);
+    assert.strictEqual(output.count, 1, 'flat layout should find 1 todo');
+    assert.strictEqual(output.todos[0].title, 'Flat Todo', 'should have correct title from flat layout');
+  });
+});

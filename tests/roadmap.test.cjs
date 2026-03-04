@@ -665,6 +665,102 @@ describe('roadmap update-plan-progress command', () => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
+// namespace-aware roadmap
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('namespace-aware roadmap', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = createTempProject();
+    // Set up namespace: .planning/.active = 'my-project'
+    fs.writeFileSync(path.join(tmpDir, '.planning', '.active'), 'my-project');
+    // Create namespaced directory structure
+    fs.mkdirSync(path.join(tmpDir, '.planning', 'my-project', 'phases'), { recursive: true });
+  });
+
+  afterEach(() => {
+    cleanup(tmpDir);
+  });
+
+  test('cmdRoadmapGetPhase reads ROADMAP.md from namespaced directory', () => {
+    // Write ROADMAP.md in namespaced dir only (NOT in flat .planning/)
+    fs.writeFileSync(
+      path.join(tmpDir, '.planning', 'my-project', 'ROADMAP.md'),
+      `# Roadmap v1.0\n\n### Phase 1: Foundation\n**Goal:** Namespace foundation\n`
+    );
+
+    const result = runGsdTools('roadmap get-phase 1', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+
+    const output = JSON.parse(result.output);
+    assert.strictEqual(output.found, true, 'phase should be found in namespaced dir');
+    assert.strictEqual(output.phase_name, 'Foundation', 'phase name extracted from namespaced ROADMAP');
+    assert.strictEqual(output.goal, 'Namespace foundation', 'goal extracted from namespaced ROADMAP');
+  });
+
+  test('cmdRoadmapAnalyze reads ROADMAP.md from namespaced directory', () => {
+    fs.writeFileSync(
+      path.join(tmpDir, '.planning', 'my-project', 'ROADMAP.md'),
+      `# Roadmap v1.0\n\n### Phase 1: NS Phase\n**Goal:** Test namespace analyze\n`
+    );
+
+    const result = runGsdTools('roadmap analyze', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+
+    const output = JSON.parse(result.output);
+    assert.strictEqual(output.phase_count, 1, 'should find 1 phase in namespaced ROADMAP');
+    assert.strictEqual(output.phases[0].name, 'NS Phase', 'phase name from namespaced ROADMAP');
+  });
+
+  test('cmdRoadmapUpdatePlanProgress reads/writes ROADMAP.md from namespaced directory', () => {
+    fs.writeFileSync(
+      path.join(tmpDir, '.planning', 'my-project', 'ROADMAP.md'),
+      `# Roadmap\n\n### Phase 1: NS Phase\n**Goal:** Test\n**Plans:** TBD\n\n## Progress\n\n| Phase | Milestone | Plans Complete | Status | Completed |\n|-------|-----------|----------------|--------|-----------|\n| 1. NS Phase | v1.0 | 0/1 | Planned | - |\n`
+    );
+    const phaseDir = path.join(tmpDir, '.planning', 'my-project', 'phases', '01-ns-phase');
+    fs.mkdirSync(phaseDir, { recursive: true });
+    fs.writeFileSync(path.join(phaseDir, '01-01-PLAN.md'), '# Plan');
+    fs.writeFileSync(path.join(phaseDir, '01-01-SUMMARY.md'), '# Summary');
+
+    const result = runGsdTools('roadmap update-plan-progress 1', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+
+    const output = JSON.parse(result.output);
+    assert.strictEqual(output.updated, true, 'should update namespaced ROADMAP');
+    assert.strictEqual(output.status, 'Complete', 'status should be Complete');
+
+    // Verify the namespaced file was modified (not flat .planning/)
+    const roadmapContent = fs.readFileSync(
+      path.join(tmpDir, '.planning', 'my-project', 'ROADMAP.md'), 'utf-8'
+    );
+    assert.ok(roadmapContent.includes('1/1'), 'namespaced ROADMAP should contain updated count');
+    assert.ok(
+      !fs.existsSync(path.join(tmpDir, '.planning', 'ROADMAP.md')),
+      'flat .planning/ROADMAP.md should not exist'
+    );
+  });
+
+  test('backward compat: no .active file uses flat .planning/ paths', () => {
+    // Remove .active file
+    fs.unlinkSync(path.join(tmpDir, '.planning', '.active'));
+
+    // Write ROADMAP.md in flat .planning/
+    fs.writeFileSync(
+      path.join(tmpDir, '.planning', 'ROADMAP.md'),
+      `# Roadmap\n\n### Phase 1: Flat Phase\n**Goal:** Flat layout\n`
+    );
+
+    const result = runGsdTools('roadmap get-phase 1', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+
+    const output = JSON.parse(result.output);
+    assert.strictEqual(output.found, true, 'should find phase in flat layout');
+    assert.strictEqual(output.phase_name, 'Flat Phase', 'phase name from flat ROADMAP');
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
 // phase add command
 // ─────────────────────────────────────────────────────────────────────────────
 
