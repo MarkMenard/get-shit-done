@@ -26,6 +26,8 @@ const {
   getRoadmapPhaseInternal,
   searchPhaseInDir,
   findPhaseInternal,
+  planningRoot,
+  writeActiveFile,
 } = require('../get-shit-done/bin/lib/core.cjs');
 
 // ─── loadConfig ────────────────────────────────────────────────────────────────
@@ -800,5 +802,116 @@ describe('getMilestonePhaseFilter', () => {
 
     const filter = getMilestonePhaseFilter(tmpDir);
     assert.strictEqual(filter.phaseCount, 0);
+  });
+});
+
+// ─── planningRoot ──────────────────────────────────────────────────────────────
+
+describe('planningRoot', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'gsd-core-test-'));
+    fs.mkdirSync(path.join(tmpDir, '.planning'), { recursive: true });
+  });
+
+  afterEach(() => {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  });
+
+  // Case 1: No .active file, no slug argument
+  test('returns .planning when no .active file exists (backward-compatible fallback)', () => {
+    const result = planningRoot(tmpDir);
+    assert.strictEqual(result, path.join(tmpDir, '.planning'));
+  });
+
+  // Case 2: .active file contains a slug, no slug argument
+  test('returns .planning/<slug> when .active contains a slug', () => {
+    fs.writeFileSync(path.join(tmpDir, '.planning', '.active'), 'my-project');
+    const result = planningRoot(tmpDir);
+    assert.strictEqual(result, path.join(tmpDir, '.planning', 'my-project'));
+  });
+
+  // Case 3: Explicit slug override (ignores .active)
+  test('returns .planning/override when explicit slug is provided, ignoring .active', () => {
+    fs.writeFileSync(path.join(tmpDir, '.planning', '.active'), 'file-slug');
+    const result = planningRoot(tmpDir, 'override');
+    assert.strictEqual(result, path.join(tmpDir, '.planning', 'override'));
+  });
+
+  // Case 4: .active file is empty string
+  test('falls back to .planning when .active file is empty', () => {
+    fs.writeFileSync(path.join(tmpDir, '.planning', '.active'), '');
+    const result = planningRoot(tmpDir);
+    assert.strictEqual(result, path.join(tmpDir, '.planning'));
+  });
+
+  // Case 5: .active file has whitespace/newlines
+  test('trims whitespace from .active file content', () => {
+    fs.writeFileSync(path.join(tmpDir, '.planning', '.active'), '  my-project\n');
+    const result = planningRoot(tmpDir);
+    assert.strictEqual(result, path.join(tmpDir, '.planning', 'my-project'));
+  });
+
+  // Case 6: .planning directory doesn't exist at all
+  test('returns .planning path even when .planning directory does not exist', () => {
+    const nonExistentSubdir = path.join(tmpDir, 'no-such-dir');
+    const result = planningRoot(nonExistentSubdir);
+    assert.strictEqual(result, path.join(nonExistentSubdir, '.planning'));
+  });
+
+  // Case 7: Pure path resolver — does NOT check if returned directory exists
+  test('returns path for nonexistent slug without throwing', () => {
+    const result = planningRoot(tmpDir, 'nonexistent-slug');
+    assert.strictEqual(result, path.join(tmpDir, '.planning', 'nonexistent-slug'));
+  });
+
+  test('never throws — always returns a string', () => {
+    assert.doesNotThrow(() => planningRoot(tmpDir));
+    assert.doesNotThrow(() => planningRoot(tmpDir, 'some-slug'));
+    assert.doesNotThrow(() => planningRoot('/totally/nonexistent/path'));
+    assert.strictEqual(typeof planningRoot(tmpDir), 'string');
+  });
+});
+
+// ─── writeActiveFile ───────────────────────────────────────────────────────────
+
+describe('writeActiveFile', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'gsd-core-test-'));
+    fs.mkdirSync(path.join(tmpDir, '.planning'), { recursive: true });
+  });
+
+  afterEach(() => {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  });
+
+  // Case 8: Creates .planning/.active with slug content
+  test('creates .planning/.active with slug content', () => {
+    writeActiveFile(tmpDir, 'new-project');
+    const content = fs.readFileSync(path.join(tmpDir, '.planning', '.active'), 'utf-8');
+    assert.strictEqual(content, 'new-project');
+  });
+
+  // Case 9: Creates .planning/ directory if it doesn't exist
+  test('creates .planning/ directory if it does not exist', () => {
+    const tmpDirWithoutPlanning = fs.mkdtempSync(path.join(os.tmpdir(), 'gsd-core-test-noplanning-'));
+    try {
+      writeActiveFile(tmpDirWithoutPlanning, 'new-project');
+      const content = fs.readFileSync(path.join(tmpDirWithoutPlanning, '.planning', '.active'), 'utf-8');
+      assert.strictEqual(content, 'new-project');
+    } finally {
+      fs.rmSync(tmpDirWithoutPlanning, { recursive: true, force: true });
+    }
+  });
+
+  // Case 10: Overwrites existing .active file
+  test('overwrites existing .active file', () => {
+    writeActiveFile(tmpDir, 'first');
+    writeActiveFile(tmpDir, 'second');
+    const content = fs.readFileSync(path.join(tmpDir, '.planning', '.active'), 'utf-8');
+    assert.strictEqual(content, 'second');
   });
 });
