@@ -32,12 +32,12 @@ INIT=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" init phase-op "${PHA
 if [[ "$INIT" == @file:* ]]; then INIT=$(cat "${INIT#@file:}"); fi
 ```
 
-Extract from init JSON: `phase_dir`, `phase_number`, `phase_name`, `has_plans`, `plan_count`.
+Extract from init JSON: `planning_root`, `phase_dir`, `phase_number`, `phase_name`, `has_plans`, `plan_count`, `requirements_path`.
 
 Then load phase details and list plans/summaries:
 ```bash
 node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" roadmap get-phase "${phase_number}"
-grep -E "^| ${phase_number}" .planning/REQUIREMENTS.md 2>/dev/null
+grep -E "^| ${phase_number}" ${requirements_path} 2>/dev/null
 ls "$phase_dir"/*-SUMMARY.md "$phase_dir"/*-PLAN.md 2>/dev/null
 ```
 
@@ -160,7 +160,7 @@ Record status and evidence for each key link.
 <step name="verify_requirements">
 If REQUIREMENTS.md exists:
 ```bash
-grep -E "Phase ${PHASE_NUM}" .planning/REQUIREMENTS.md 2>/dev/null
+grep -E "Phase ${PHASE_NUM}" ${requirements_path} 2>/dev/null
 ```
 
 For each requirement: parse description → identify supporting truths/artifacts → status: ✓ SATISFIED / ✗ BLOCKED / ? NEEDS HUMAN.

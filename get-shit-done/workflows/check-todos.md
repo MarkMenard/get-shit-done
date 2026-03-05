@@ -16,7 +16,7 @@ INIT=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" init todos)
 if [[ "$INIT" == @file:* ]]; then INIT=$(cat "${INIT#@file:}"); fi
 ```
 
-Extract from init JSON: `todo_count`, `todos`, `pending_dir`.
+Extract from init JSON: `planning_root`, `state_path`, `todo_count`, `todos`, `pending_dir`.
 
 If `todo_count` is 0:
 ```
@@ -93,7 +93,7 @@ If `files` field has entries, read and briefly summarize each.
 <step name="check_roadmap">
 Check for roadmap (can use init progress or directly check file existence):
 
-If `.planning/ROADMAP.md` exists:
+If `${planning_root}/ROADMAP.md` exists:
 1. Check if todo's area matches an upcoming phase
 2. Check if todo's files overlap with a phase's scope
 3. Note any match for action options
@@ -126,7 +126,7 @@ Use AskUserQuestion:
 <step name="execute_action">
 **Work on it now:**
 ```bash
-mv ".planning/todos/pending/[filename]" ".planning/todos/done/"
+mv "${planning_root}/todos/pending/[filename]" "${planning_root}/todos/done/"
 ```
 Update STATE.md todo count. Present problem/solution context. Begin work or ask how to proceed.
 
@@ -154,8 +154,8 @@ Re-run `init todos` to get updated count, then update STATE.md "### Pending Todo
 If todo was moved to done/, commit the change:
 
 ```bash
-git rm --cached .planning/todos/pending/[filename] 2>/dev/null || true
-node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" commit "docs: start work on todo - [title]" --files .planning/todos/done/[filename] .planning/STATE.md
+git rm --cached ${planning_root}/todos/pending/[filename] 2>/dev/null || true
+node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" commit "docs: start work on todo - [title]" --files ${planning_root}/todos/done/[filename] ${state_path}
 ```
 
 Tool respects `commit_docs` config and gitignore automatically.

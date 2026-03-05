@@ -6,7 +6,18 @@ Key difference from discuss-phase: This is ANALYSIS of what Claude thinks, not I
 
 <process>
 
-<step name="validate_phase" priority="first">
+<step name="init_context" priority="first">
+Load phase operation context:
+
+```bash
+INIT=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" init phase-op "${PHASE}")
+if [[ "$INIT" == @file:* ]]; then INIT=$(cat "${INIT#@file:}"); fi
+```
+
+Extract from init JSON: `planning_root`, `phase_dir`, `roadmap_path`.
+</step>
+
+<step name="validate_phase">
 Phase number: $ARGUMENTS (required)
 
 **If argument missing:**
@@ -24,7 +35,7 @@ Exit workflow.
 Validate phase exists in roadmap:
 
 ```bash
-cat .planning/ROADMAP.md | grep -i "Phase ${PHASE}"
+cat ${roadmap_path} | grep -i "Phase ${PHASE}"
 ```
 
 **If phase not found:**

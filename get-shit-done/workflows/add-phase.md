@@ -33,9 +33,11 @@ INIT=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" init phase-op "0")
 if [[ "$INIT" == @file:* ]]; then INIT=$(cat "${INIT#@file:}"); fi
 ```
 
+Extract from init JSON: `planning_root`, `phase_dir`, `state_path`, `roadmap_path`, `roadmap_exists`.
+
 Check `roadmap_exists` from init JSON. If false:
 ```
-ERROR: No roadmap found (.planning/ROADMAP.md)
+ERROR: No roadmap found (${planning_root}/ROADMAP.md)
 Run /gsd:new-project to initialize.
 ```
 Exit.
@@ -52,7 +54,7 @@ The CLI handles:
 - Finding the highest existing integer phase number
 - Calculating next phase number (max + 1)
 - Generating slug from description
-- Creating the phase directory (`.planning/phases/{NN}-{slug}/`)
+- Creating the phase directory (`${planning_root}/phases/{NN}-{slug}/`)
 - Inserting the phase entry into ROADMAP.md with Goal, Depends on, and Plans sections
 
 Extract from result: `phase_number`, `padded`, `name`, `slug`, `directory`.
@@ -61,7 +63,7 @@ Extract from result: `phase_number`, `padded`, `name`, `slug`, `directory`.
 <step name="update_project_state">
 Update STATE.md to reflect the new phase:
 
-1. Read `.planning/STATE.md`
+1. Read `${state_path}`
 2. Under "## Accumulated Context" → "### Roadmap Evolution" add entry:
    ```
    - Phase {N} added: {description}
@@ -76,10 +78,10 @@ Present completion summary:
 ```
 Phase {N} added to current milestone:
 - Description: {description}
-- Directory: .planning/phases/{phase-num}-{slug}/
+- Directory: ${planning_root}/phases/{phase-num}-{slug}/
 - Status: Not planned yet
 
-Roadmap updated: .planning/ROADMAP.md
+Roadmap updated: ${roadmap_path}
 
 ---
 

@@ -1,5 +1,5 @@
 <purpose>
-Validate `.planning/` directory integrity and report actionable issues. Checks for missing files, invalid configurations, inconsistent state, and orphaned plans. Optionally repairs auto-fixable issues.
+Validate `${planning_root}/` directory integrity and report actionable issues. Checks for missing files, invalid configurations, inconsistent state, and orphaned plans. Optionally repairs auto-fixable issues.
 </purpose>
 
 <required_reading>
@@ -7,6 +7,17 @@ Read all files referenced by the invoking prompt's execution_context before star
 </required_reading>
 
 <process>
+
+<step name="init_context" priority="first">
+Load project context:
+
+```bash
+INIT=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" state load)
+if [[ "$INIT" == @file:* ]]; then INIT=$(cat "${INIT#@file:}"); fi
+```
+
+Extract from init JSON: `planning_root`.
+</step>
 
 <step name="parse_args">
 **Parse arguments:**
@@ -124,7 +135,7 @@ Report final status.
 
 | Code | Severity | Description | Repairable |
 |------|----------|-------------|------------|
-| E001 | error | .planning/ directory not found | No |
+| E001 | error | ${planning_root}/ directory not found | No |
 | E002 | error | PROJECT.md not found | No |
 | E003 | error | ROADMAP.md not found | No |
 | E004 | error | STATE.md not found | Yes |

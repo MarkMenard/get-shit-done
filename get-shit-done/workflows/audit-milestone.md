@@ -15,7 +15,7 @@ INIT=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" init milestone-op)
 if [[ "$INIT" == @file:* ]]; then INIT=$(cat "${INIT#@file:}"); fi
 ```
 
-Extract from init JSON: `milestone_version`, `milestone_name`, `phase_count`, `completed_phases`, `commit_docs`.
+Extract from init JSON: `planning_root`, `milestone_version`, `milestone_name`, `phase_count`, `completed_phases`, `commit_docs`.
 
 Resolve integration checker model:
 ```bash
@@ -104,7 +104,7 @@ For each phase's VERIFICATION.md, extract the expanded requirements table:
 
 For each phase's SUMMARY.md, extract `requirements-completed` from YAML frontmatter:
 ```bash
-for summary in .planning/phases/*-*/*-SUMMARY.md; do
+for summary in ${planning_root}/phases/*-*/*-SUMMARY.md; do
   node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" summary-extract "$summary" --fields requirements_completed | jq -r '.requirements_completed'
 done
 ```
@@ -154,7 +154,7 @@ Discovery only — never auto-calls `/gsd:validate-phase`.
 
 ## 6. Aggregate into v{version}-MILESTONE-AUDIT.md
 
-Create `.planning/v{version}-v{version}-MILESTONE-AUDIT.md` with:
+Create `${planning_root}/v{version}-v{version}-MILESTONE-AUDIT.md` with:
 
 ```yaml
 ---
@@ -211,7 +211,7 @@ Output this markdown directly (not as a code block). Route based on status:
 ## ✓ Milestone {version} — Audit Passed
 
 **Score:** {N}/{M} requirements satisfied
-**Report:** .planning/v{version}-MILESTONE-AUDIT.md
+**Report:** ${planning_root}/v{version}-MILESTONE-AUDIT.md
 
 All requirements covered. Cross-phase integration verified. E2E flows complete.
 
@@ -234,7 +234,7 @@ All requirements covered. Cross-phase integration verified. E2E flows complete.
 ## ⚠ Milestone {version} — Gaps Found
 
 **Score:** {N}/{M} requirements satisfied
-**Report:** .planning/v{version}-MILESTONE-AUDIT.md
+**Report:** ${planning_root}/v{version}-MILESTONE-AUDIT.md
 
 ### Unsatisfied Requirements
 
@@ -273,7 +273,7 @@ Phases needing validation: run `/gsd:validate-phase {N}` for each flagged phase.
 ───────────────────────────────────────────────────────────────
 
 **Also available:**
-- cat .planning/v{version}-MILESTONE-AUDIT.md — see full report
+- cat ${planning_root}/v{version}-MILESTONE-AUDIT.md — see full report
 - /gsd:complete-milestone {version} — proceed anyway (accept tech debt)
 
 ───────────────────────────────────────────────────────────────
@@ -285,7 +285,7 @@ Phases needing validation: run `/gsd:validate-phase {N}` for each flagged phase.
 ## ⚡ Milestone {version} — Tech Debt Review
 
 **Score:** {N}/{M} requirements satisfied
-**Report:** .planning/v{version}-MILESTONE-AUDIT.md
+**Report:** ${planning_root}/v{version}-MILESTONE-AUDIT.md
 
 All requirements met. No critical blockers. Accumulated tech debt needs review.
 

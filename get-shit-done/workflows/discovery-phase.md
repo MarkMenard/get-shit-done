@@ -33,6 +33,17 @@ See ~/.claude/get-shit-done/templates/discovery.md `<discovery_protocol>` for fu
 
 <process>
 
+<step name="init_context" priority="first">
+Load phase operation context:
+
+```bash
+INIT=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" init phase-op "${PHASE}")
+if [[ "$INIT" == @file:* ]]; then INIT=$(cat "${INIT#@file:}"); fi
+```
+
+Extract from init JSON: `planning_root`, `phase_dir`.
+</step>
+
 <step name="determine_depth">
 Check the depth parameter passed from plan-phase.md:
 - `depth=verify` → Level 1 (Quick Verification)
@@ -116,7 +127,7 @@ For: Choosing between options, new external integration.
 
 7. Return to plan-phase.md.
 
-**Output:** `.planning/phases/XX-name/DISCOVERY.md`
+**Output:** `${phase_dir}/DISCOVERY.md`
 </step>
 
 <step name="level_3_deep_dive">
@@ -169,7 +180,7 @@ For: Architectural decisions, novel problems, high-risk choices.
 
 8. Return to plan-phase.md.
 
-**Output:** `.planning/phases/XX-name/DISCOVERY.md` (comprehensive)
+**Output:** `${phase_dir}/DISCOVERY.md` (comprehensive)
 </step>
 
 <step name="identify_unknowns">
@@ -203,7 +214,7 @@ Run the discovery:
 </step>
 
 <step name="create_discovery_output">
-Write `.planning/phases/XX-name/DISCOVERY.md`:
+Write `${phase_dir}/DISCOVERY.md`:
 - Summary with recommendation
 - Key findings with sources
 - Code examples if applicable
@@ -246,7 +257,7 @@ If "address first": Gather user input on questions, update discovery.
 
 <step name="offer_next">
 ```
-Discovery complete: .planning/phases/XX-name/DISCOVERY.md
+Discovery complete: ${phase_dir}/DISCOVERY.md
 Recommendation: [one-liner]
 Confidence: [level]
 

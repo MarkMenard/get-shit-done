@@ -35,7 +35,7 @@ Extract `--prd <filepath>` from $ARGUMENTS. If present, set PRD_FILE to the file
 
 **If `phase_found` is false:** Validate phase exists in ROADMAP.md. If valid, create the directory using `phase_slug` and `padded_phase` from init:
 ```bash
-mkdir -p ".planning/phases/${padded_phase}-${phase_slug}"
+mkdir -p "${planning_root}/phases/${padded_phase}-${phase_slug}"
 ```
 
 **Existing artifacts from init:** `has_research`, `has_plans`, `plan_count`.
@@ -537,14 +537,14 @@ Verification: {Passed | Passed with override | Skipped}
 ───────────────────────────────────────────────────────────────
 
 **Also available:**
-- cat .planning/phases/{phase-dir}/*-PLAN.md — review plans
+- cat ${phase_dir}/*-PLAN.md — review plans
 - /gsd:plan-phase {X} --research — re-research first
 
 ───────────────────────────────────────────────────────────────
 </offer_next>
 
 <success_criteria>
-- [ ] .planning/ directory validated
+- [ ] ${planning_root}/ directory validated
 - [ ] Phase validated against roadmap
 - [ ] Phase directory created if needed
 - [ ] CONTEXT.md loaded early (step 4) and passed to ALL agents
