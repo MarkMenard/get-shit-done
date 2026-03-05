@@ -12,12 +12,21 @@ Read all files referenced by the invoking prompt's execution_context before star
 
 <process>
 
+## 0. Init
+
+```bash
+INIT=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" init new-milestone)
+if [[ "$INIT" == @file:* ]]; then INIT=$(cat "${INIT#@file:}"); fi
+```
+
+Extract from init JSON: `planning_root`, `researcher_model`, `synthesizer_model`, `roadmapper_model`, `commit_docs`, `research_enabled`, `current_milestone`, `project_exists`, `roadmap_exists`.
+
 ## 1. Load Context
 
-- Read PROJECT.md (existing project, validated requirements, decisions)
-- Read MILESTONES.md (what shipped previously)
-- Read STATE.md (pending todos, blockers)
-- Check for MILESTONE-CONTEXT.md (from /gsd:discuss-milestone)
+- Read ${planning_root}/PROJECT.md (existing project, validated requirements, decisions)
+- Read ${planning_root}/MILESTONES.md (what shipped previously)
+- Read ${planning_root}/STATE.md (pending todos, blockers)
+- Check for ${planning_root}/MILESTONE-CONTEXT.md (from /gsd:discuss-milestone)
 
 ## 2. Gather Milestone Goals
 
@@ -72,17 +81,12 @@ Keep Accumulated Context section from previous milestone.
 Delete MILESTONE-CONTEXT.md if exists (consumed).
 
 ```bash
-node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" commit "docs: start milestone v[X.Y] [Name]" --files .planning/PROJECT.md .planning/STATE.md
+node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" commit "docs: start milestone v[X.Y] [Name]" --files ${planning_root}/PROJECT.md ${planning_root}/STATE.md
 ```
 
-## 7. Load Context and Resolve Models
+## 7. Resolve Models
 
-```bash
-INIT=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" init new-milestone)
-if [[ "$INIT" == @file:* ]]; then INIT=$(cat "${INIT#@file:}"); fi
-```
-
-Extract from init JSON: `researcher_model`, `synthesizer_model`, `roadmapper_model`, `commit_docs`, `research_enabled`, `current_milestone`, `project_exists`, `roadmap_exists`.
+Use models from init (Step 0): `researcher_model`, `synthesizer_model`, `roadmapper_model`.
 
 ## 8. Research Decision
 
@@ -112,7 +116,7 @@ node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" config-set workflow.researc
 ```
 
 ```bash
-mkdir -p .planning/research
+mkdir -p ${planning_root}/research
 ```
 
 Spawn 4 parallel gsd-project-researcher agents. Each uses this template with dimension-specific fields:
@@ -131,7 +135,7 @@ Focus ONLY on what's needed for the NEW features.
 <question>{QUESTION}</question>
 
 <files_to_read>
-- .planning/PROJECT.md (Project context)
+- ${planning_root}/PROJECT.md (Project context)
 </files_to_read>
 
 <downstream_consumer>{CONSUMER}</downstream_consumer>
@@ -139,7 +143,7 @@ Focus ONLY on what's needed for the NEW features.
 <quality_gate>{GATES}</quality_gate>
 
 <output>
-Write to: .planning/research/{FILE}
+Write to: ${planning_root}/research/{FILE}
 Use template: ~/.claude/get-shit-done/templates/research-project/{FILE}
 </output>
 ", subagent_type="gsd-project-researcher", model="{researcher_model}", description="{DIMENSION} research")
@@ -162,13 +166,13 @@ Task(prompt="
 Synthesize research outputs into SUMMARY.md.
 
 <files_to_read>
-- .planning/research/STACK.md
-- .planning/research/FEATURES.md
-- .planning/research/ARCHITECTURE.md
-- .planning/research/PITFALLS.md
+- ${planning_root}/research/STACK.md
+- ${planning_root}/research/FEATURES.md
+- ${planning_root}/research/ARCHITECTURE.md
+- ${planning_root}/research/PITFALLS.md
 </files_to_read>
 
-Write to: .planning/research/SUMMARY.md
+Write to: ${planning_root}/research/SUMMARY.md
 Use template: ~/.claude/get-shit-done/templates/research-project/SUMMARY.md
 Commit after writing.
 ", subagent_type="gsd-research-synthesizer", model="{synthesizer_model}", description="Synthesize research")
@@ -255,7 +259,7 @@ If "adjust": Return to scoping.
 
 **Commit requirements:**
 ```bash
-node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" commit "docs: define milestone v[X.Y] requirements" --files .planning/REQUIREMENTS.md
+node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" commit "docs: define milestone v[X.Y] requirements" --files ${planning_root}/REQUIREMENTS.md
 ```
 
 ## 10. Create Roadmap
@@ -274,11 +278,11 @@ node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" commit "docs: define milest
 Task(prompt="
 <planning_context>
 <files_to_read>
-- .planning/PROJECT.md
-- .planning/REQUIREMENTS.md
-- .planning/research/SUMMARY.md (if exists)
-- .planning/config.json
-- .planning/MILESTONES.md
+- ${planning_root}/PROJECT.md
+- ${planning_root}/REQUIREMENTS.md
+- ${planning_root}/research/SUMMARY.md (if exists)
+- ${planning_root}/config.json
+- ${planning_root}/MILESTONES.md
 </files_to_read>
 </planning_context>
 
@@ -332,7 +336,7 @@ Success criteria:
 
 **Commit roadmap** (after approval):
 ```bash
-node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" commit "docs: create milestone v[X.Y] roadmap ([N] phases)" --files .planning/ROADMAP.md .planning/STATE.md .planning/REQUIREMENTS.md
+node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" commit "docs: create milestone v[X.Y] roadmap ([N] phases)" --files ${planning_root}/ROADMAP.md ${planning_root}/STATE.md ${planning_root}/REQUIREMENTS.md
 ```
 
 ## 11. Done
@@ -346,10 +350,10 @@ node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" commit "docs: create milest
 
 | Artifact       | Location                    |
 |----------------|-----------------------------|
-| Project        | `.planning/PROJECT.md`      |
-| Research       | `.planning/research/`       |
-| Requirements   | `.planning/REQUIREMENTS.md` |
-| Roadmap        | `.planning/ROADMAP.md`      |
+| Project        | `${planning_root}/PROJECT.md`      |
+| Research       | `${planning_root}/research/`       |
+| Requirements   | `${planning_root}/REQUIREMENTS.md` |
+| Roadmap        | `${planning_root}/ROADMAP.md`      |
 
 **[N] phases** | **[X] requirements** | Ready to build ✓
 
