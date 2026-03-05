@@ -2,9 +2,9 @@
 
 **Read these files NOW:**
 
-1. `.planning/STATE.md`
-2. `.planning/PROJECT.md`
-3. `.planning/ROADMAP.md`
+1. `${state_path}`
+2. `${planning_root}/PROJECT.md`
+3. `${roadmap_path}`
 4. Current phase's plan files (`*-PLAN.md`)
 5. Current phase's summary files (`*-SUMMARY.md`)
 
@@ -20,13 +20,24 @@ Mark current phase complete and advance to next. This is the natural point where
 
 <process>
 
-<step name="load_project_state" priority="first">
+<step name="init_context" priority="first">
+Load phase operation context:
+
+```bash
+INIT=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" init phase-op "${PHASE}")
+if [[ "$INIT" == @file:* ]]; then INIT=$(cat "${INIT#@file:}"); fi
+```
+
+Extract from init JSON: `planning_root`, `phase_dir`, `state_path`, `roadmap_path`, `config_path`.
+</step>
+
+<step name="load_project_state">
 
 Before transition, read project state:
 
 ```bash
-cat .planning/STATE.md 2>/dev/null
-cat .planning/PROJECT.md 2>/dev/null
+cat ${state_path} 2>/dev/null
+cat ${planning_root}/PROJECT.md 2>/dev/null
 ```
 
 Parse current position to verify we're transitioning the right phase.
@@ -39,8 +50,8 @@ Note accumulated context that may need updating after transition.
 Check current phase has all plan summaries:
 
 ```bash
-ls .planning/phases/XX-current/*-PLAN.md 2>/dev/null | sort
-ls .planning/phases/XX-current/*-SUMMARY.md 2>/dev/null | sort
+ls ${phase_dir}/*-PLAN.md 2>/dev/null | sort
+ls ${phase_dir}/*-SUMMARY.md 2>/dev/null | sort
 ```
 
 **Verification logic:**
@@ -53,7 +64,7 @@ ls .planning/phases/XX-current/*-SUMMARY.md 2>/dev/null | sort
 <config-check>
 
 ```bash
-cat .planning/config.json 2>/dev/null
+cat ${config_path} 2>/dev/null
 ```
 
 </config-check>
@@ -111,7 +122,7 @@ Wait for user decision.
 Check for lingering handoffs:
 
 ```bash
-ls .planning/phases/XX-current/.continue-here*.md 2>/dev/null
+ls ${phase_dir}/.continue-here*.md 2>/dev/null
 ```
 
 If found, delete them — phase is complete, handoffs are stale.
@@ -151,7 +162,7 @@ Evolve PROJECT.md to reflect learnings from completed phase.
 **Read phase summaries:**
 
 ```bash
-cat .planning/phases/XX-current/*-SUMMARY.md
+cat ${phase_dir}/*-SUMMARY.md
 ```
 
 **Assess requirement changes:**
@@ -259,7 +270,7 @@ Update Project Reference section in STATE.md.
 ```markdown
 ## Project Reference
 
-See: .planning/PROJECT.md (updated [today])
+See: ${planning_root}/PROJECT.md (updated [today])
 
 **Core value:** [Current core value from PROJECT.md]
 **Current focus:** [Next phase name]
@@ -361,7 +372,7 @@ Read ROADMAP.md to get the next phase's name and goal.
 **Check if next phase has CONTEXT.md:**
 
 ```bash
-ls .planning/phases/*[X+1]*/*-CONTEXT.md 2>/dev/null
+ls ${planning_root}/phases/*[X+1]*/*-CONTEXT.md 2>/dev/null
 ```
 
 **If next phase exists:**
