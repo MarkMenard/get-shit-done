@@ -25,9 +25,9 @@ Requirements for initial release. Each maps to roadmap phases.
 ### Workflow Updates
 
 - [ ] **WORK-01**: All 33 workflow .md files reference init-provided path variables, not hardcoded `.planning/` paths
-- [ ] **WORK-02**: Agent prompt templates in workflows receive resolved paths as parameters
+- [x] **WORK-02**: Agent prompt templates in workflows receive resolved paths as parameters
 - [ ] **WORK-03**: Bash commands in workflows use path variables from init output
-- [ ] **WORK-04**: Template files that reference `.planning/` paths use placeholder variables
+- [x] **WORK-04**: Template files that reference `.planning/` paths use placeholder variables
 
 ### Tool Updates
 
@@ -82,9 +82,9 @@ Requirements for initial release. Each maps to roadmap phases.
 | MIGR-03 | Phase 4 | Pending |
 | MIGR-04 | Phase 4 | Pending |
 | WORK-01 | Phase 3 | Pending |
-| WORK-02 | Phase 3 | Pending |
+| WORK-02 | Phase 3 | Complete |
 | WORK-03 | Phase 3 | Pending |
-| WORK-04 | Phase 3 | Pending |
+| WORK-04 | Phase 3 | Complete |
 | TOOL-01 | Phase 2 | Complete |
 | TOOL-02 | Phase 2 | Complete |
 | TOOL-03 | Phase 2 | Complete |

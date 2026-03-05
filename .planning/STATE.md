@@ -2,13 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: unknown
-last_updated: "2026-03-04T23:12:27.351Z"
+status: executing
+stopped_at: Completed 03-04-PLAN.md
+last_updated: "2026-03-05T21:06:30Z"
+last_activity: 2026-03-05 -- Completed 03-04 (template namespace placeholders)
 progress:
-  total_phases: 2
+  total_phases: 6
   completed_phases: 2
-  total_plans: 5
-  completed_plans: 5
+  total_plans: 6
+  completed_plans: 6
+  percent: 80
 ---
 
 # Project State
@@ -18,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-04)
 
 **Core value:** Every GSD workflow operates on the correct project's planning state, regardless of branch history or repo context.
-**Current focus:** Phase 2 - Init and Tool Integration
+**Current focus:** Phase 3 - Workflow Updates
 
 ## Current Position
 
-Phase: 2 of 6 (Init and Tool Integration)
-Plan: 3 of N in current phase
+Phase: 3 of 6 (Workflow Updates)
+Plan: 4 of N in current phase
 Status: In progress
-Last activity: 2026-03-04 -- Completed 02-03 (roadmap, milestone, state, commands namespace-aware)
+Last activity: 2026-03-05 -- Completed 03-04 (template namespace placeholders)
 
-Progress: [████████░░] 77%
+Progress: [████████░░] 80%
 
 ## Performance Metrics
 
@@ -52,6 +55,7 @@ Progress: [████████░░] 77%
 | Phase 02-init-and-tool-integration P01 | 7min | 2 tasks | 4 files |
 | Phase 02-init-and-tool-integration P02 | 9 | 1 tasks | 2 files |
 | Phase 02-init-and-tool-integration P03 | 15min | 2 tasks | 6 files |
+| Phase 03-workflow-updates P04 | 8min | 2 tasks | 18 files |
 
 ## Accumulated Context
 
@@ -77,6 +81,7 @@ Recent decisions affecting current work:
 - [Phase 02-init-and-tool-integration]: cmdPhaseRemove and cmdPhaseComplete updated statePath/reqPath from path.join(cwd, '.planning', ...) to path.join(root, ...) for namespace correctness
 - [Phase 02-03]: config.cjs:174 .planning/.gitignore intentionally kept flat — .active and its gitignore both live at flat .planning/ level
 - [Phase 02-03]: verify.cjs included in plan 03 scope — plan success criteria required zero hardcoded refs in ANY lib file
+- [Phase 03-04]: All template .planning/ refs replaced with ${planning_root}/${phase_dir} variable placeholders — consuming workflows populate via string interpolation at render time
 
 ### Pending Todos
 
@@ -89,6 +94,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-04T23:12:00Z
-Stopped at: Completed 02-03-PLAN.md (roadmap/milestone/state/commands/verify namespace-aware)
-Resume file: .planning/phases/02-init-and-tool-integration/02-CONTEXT.md
+Last session: 2026-03-05T21:06:30Z
+Stopped at: Completed 03-04-PLAN.md
+Resume file: .planning/phases/03-workflow-updates/03-CONTEXT.md
