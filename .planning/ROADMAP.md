@@ -13,7 +13,7 @@ Transform GSD from a flat `.planning/` layout to namespace-aware `.planning/<slu
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Core Path Resolution** - Central planningRoot function, config loading, and slug storage (completed 2026-03-04)
-- [ ] **Phase 2: Init and Tool Integration** - All init functions and gsd-tools commands resolve paths through planningRoot
+- [x] **Phase 2: Init and Tool Integration** - All init functions and gsd-tools commands resolve paths through planningRoot (completed 2026-03-04)
 - [ ] **Phase 3: Workflow Updates** - All 33 workflow files and templates use init-provided paths
 - [ ] **Phase 4: Migration System** - Detect flat layouts, prompt user, migrate files, validate
 - [ ] **Phase 5: Multi-Project Support** - Multiple namespaces coexist with selection and listing
@@ -61,12 +61,13 @@ Plans:
   2. Agent prompts spawned by workflows receive resolved paths as parameters (not string literals)
   3. Bash commands within workflows use `$path_variable` patterns sourced from init JSON output
   4. Template files use placeholder variables that get resolved at runtime
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- [ ] 03-01: TBD
-- [ ] 03-02: TBD
-- [ ] 03-03: TBD
+- [ ] 03-01-PLAN.md — Replace .planning/ refs in heaviest workflows (new-project, complete-milestone, new-milestone)
+- [ ] 03-02-PLAN.md — Replace .planning/ refs in medium-density workflows (map-codebase, execute-plan, etc.)
+- [ ] 03-03-PLAN.md — Replace refs in remaining workflows + add init to no-init workflows
+- [ ] 03-04-PLAN.md — Replace .planning/ refs in all template files
 
 ### Phase 4: Migration System
 **Goal**: Users with existing flat `.planning/` layouts are detected and migrated cleanly into a namespace
@@ -121,8 +122,8 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Core Path Resolution | 2/2 | Complete   | 2026-03-04 |
-| 2. Init and Tool Integration | 2/3 | In Progress|  |
-| 3. Workflow Updates | 0/3 | Not started | - |
+| 2. Init and Tool Integration | 3/3 | Complete   | 2026-03-04 |
+| 3. Workflow Updates | 0/4 | Not started | - |
 | 4. Migration System | 0/2 | Not started | - |
 | 5. Multi-Project Support | 0/2 | Not started | - |
 | 6. Validation and Self-Hosting | 0/2 | Not started | - |

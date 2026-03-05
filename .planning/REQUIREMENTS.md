@@ -13,7 +13,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **PATH-02**: All init commands (12 functions in init.cjs) return paths resolved through `planningRoot`
 - [x] **PATH-03**: `loadConfig()` resolves config.json through project slug
 - [x] **PATH-04**: Project slug is stored and retrievable from `.planning/<slug>/config.json`
-- [ ] **PATH-05**: All gsd-tools commands that read/write planning files resolve through `planningRoot`
+- [x] **PATH-05**: All gsd-tools commands that read/write planning files resolve through `planningRoot`
 
 ### Migration
 
@@ -34,8 +34,8 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **TOOL-01**: All bin/lib/*.cjs files (init.cjs, core.cjs, phase.cjs, etc.) use `planningRoot` for path construction
 - [x] **TOOL-02**: gsd-tools.js (main entry, 4,781 lines) routes all path references through resolution
 - [x] **TOOL-03**: Phase operations (next-decimal, add, insert, remove, complete) use resolved paths
-- [ ] **TOOL-04**: Roadmap operations (get-phase, analyze, update-plan-progress) use resolved paths
-- [ ] **TOOL-05**: Milestone operations use resolved paths for archiving
+- [x] **TOOL-04**: Roadmap operations (get-phase, analyze, update-plan-progress) use resolved paths
+- [x] **TOOL-05**: Milestone operations use resolved paths for archiving
 
 ### Multi-Project
 
@@ -76,7 +76,7 @@ Requirements for initial release. Each maps to roadmap phases.
 | PATH-02 | Phase 2 | Complete |
 | PATH-03 | Phase 1 | Complete |
 | PATH-04 | Phase 1 | Complete |
-| PATH-05 | Phase 2 | Pending |
+| PATH-05 | Phase 2 | Complete |
 | MIGR-01 | Phase 4 | Pending |
 | MIGR-02 | Phase 4 | Pending |
 | MIGR-03 | Phase 4 | Pending |
@@ -88,8 +88,8 @@ Requirements for initial release. Each maps to roadmap phases.
 | TOOL-01 | Phase 2 | Complete |
 | TOOL-02 | Phase 2 | Complete |
 | TOOL-03 | Phase 2 | Complete |
-| TOOL-04 | Phase 2 | Pending |
-| TOOL-05 | Phase 2 | Pending |
+| TOOL-04 | Phase 2 | Complete |
+| TOOL-05 | Phase 2 | Complete |
 | MULT-01 | Phase 5 | Pending |
 | MULT-02 | Phase 5 | Pending |
 | MULT-03 | Phase 5 | Pending |
