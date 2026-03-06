@@ -589,6 +589,12 @@ async function main() {
       break;
     }
 
+    case 'migrate': {
+      const migration = require('./lib/migration.cjs');
+      migration.cmdMigrate(cwd, args[1], raw);
+      break;
+    }
+
     default:
       error(`Unknown command: ${command}`);
   }
