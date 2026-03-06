@@ -6,8 +6,15 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 const { loadConfig, resolveModelInternal, findPhaseInternal, getRoadmapPhaseInternal, pathExistsInternal, generateSlugInternal, getMilestoneInfo, normalizePhaseName, toPosixPath, planningRoot, output, error } = require('./core.cjs');
+const { detectFlatLayout } = require('./migration.cjs');
 
 function cmdInitExecutePhase(cwd, phase, raw) {
+  const migration = detectFlatLayout(cwd);
+  if (migration.needs_migration) {
+    output(migration, raw);
+    return;
+  }
+
   if (!phase) {
     error('phase required for init execute-phase');
   }
@@ -86,6 +93,12 @@ function cmdInitExecutePhase(cwd, phase, raw) {
 }
 
 function cmdInitPlanPhase(cwd, phase, raw) {
+  const migration = detectFlatLayout(cwd);
+  if (migration.needs_migration) {
+    output(migration, raw);
+    return;
+  }
+
   if (!phase) {
     error('phase required for init plan-phase');
   }
@@ -234,6 +247,12 @@ function cmdInitNewProject(cwd, raw) {
 }
 
 function cmdInitNewMilestone(cwd, raw) {
+  const migration = detectFlatLayout(cwd);
+  if (migration.needs_migration) {
+    output(migration, raw);
+    return;
+  }
+
   const root = planningRoot(cwd);
   const rootRel = toPosixPath(path.relative(cwd, root));
   const config = loadConfig(cwd);
@@ -271,6 +290,12 @@ function cmdInitNewMilestone(cwd, raw) {
 }
 
 function cmdInitQuick(cwd, description, raw) {
+  const migration = detectFlatLayout(cwd);
+  if (migration.needs_migration) {
+    output(migration, raw);
+    return;
+  }
+
   const root = planningRoot(cwd);
   const rootRel = toPosixPath(path.relative(cwd, root));
   const config = loadConfig(cwd);
@@ -326,6 +351,12 @@ function cmdInitQuick(cwd, description, raw) {
 }
 
 function cmdInitResume(cwd, raw) {
+  const migration = detectFlatLayout(cwd);
+  if (migration.needs_migration) {
+    output(migration, raw);
+    return;
+  }
+
   const root = planningRoot(cwd);
   const rootRel = toPosixPath(path.relative(cwd, root));
   const config = loadConfig(cwd);
@@ -363,6 +394,12 @@ function cmdInitResume(cwd, raw) {
 }
 
 function cmdInitVerifyWork(cwd, phase, raw) {
+  const migration = detectFlatLayout(cwd);
+  if (migration.needs_migration) {
+    output(migration, raw);
+    return;
+  }
+
   if (!phase) {
     error('phase required for init verify-work');
   }
@@ -397,6 +434,12 @@ function cmdInitVerifyWork(cwd, phase, raw) {
 }
 
 function cmdInitPhaseOp(cwd, phase, raw) {
+  const migration = detectFlatLayout(cwd);
+  if (migration.needs_migration) {
+    output(migration, raw);
+    return;
+  }
+
   const root = planningRoot(cwd);
   const rootRel = toPosixPath(path.relative(cwd, root));
   const config = loadConfig(cwd);
@@ -483,6 +526,12 @@ function cmdInitPhaseOp(cwd, phase, raw) {
 }
 
 function cmdInitTodos(cwd, area, raw) {
+  const migration = detectFlatLayout(cwd);
+  if (migration.needs_migration) {
+    output(migration, raw);
+    return;
+  }
+
   const root = planningRoot(cwd);
   const rootRel = toPosixPath(path.relative(cwd, root));
   const config = loadConfig(cwd);
@@ -547,6 +596,12 @@ function cmdInitTodos(cwd, area, raw) {
 }
 
 function cmdInitMilestoneOp(cwd, raw) {
+  const migration = detectFlatLayout(cwd);
+  if (migration.needs_migration) {
+    output(migration, raw);
+    return;
+  }
+
   const root = planningRoot(cwd);
   const rootRel = toPosixPath(path.relative(cwd, root));
   const config = loadConfig(cwd);
@@ -613,6 +668,12 @@ function cmdInitMilestoneOp(cwd, raw) {
 }
 
 function cmdInitMapCodebase(cwd, raw) {
+  const migration = detectFlatLayout(cwd);
+  if (migration.needs_migration) {
+    output(migration, raw);
+    return;
+  }
+
   const root = planningRoot(cwd);
   const rootRel = toPosixPath(path.relative(cwd, root));
   const config = loadConfig(cwd);
@@ -652,6 +713,12 @@ function cmdInitMapCodebase(cwd, raw) {
 }
 
 function cmdInitProgress(cwd, raw) {
+  const migration = detectFlatLayout(cwd);
+  if (migration.needs_migration) {
+    output(migration, raw);
+    return;
+  }
+
   const root = planningRoot(cwd);
   const rootRel = toPosixPath(path.relative(cwd, root));
   const config = loadConfig(cwd);

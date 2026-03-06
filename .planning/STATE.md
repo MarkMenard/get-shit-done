@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 03-01-PLAN.md
-last_updated: "2026-03-05T21:12:11.477Z"
-last_activity: 2026-03-05 -- Completed 03-04 (template namespace placeholders)
+stopped_at: Completed 04-01-PLAN.md
+last_updated: "2026-03-06T00:59:23.027Z"
+last_activity: 2026-03-05 -- Completed 03-03 (remaining workflow refs replaced)
 progress:
   total_phases: 6
-  completed_phases: 2
-  total_plans: 9
-  completed_plans: 8
+  completed_phases: 3
+  total_plans: 11
+  completed_plans: 10
   percent: 80
 ---
 
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-03-04)
 ## Current Position
 
 Phase: 3 of 6 (Workflow Updates)
-Plan: 4 of N in current phase
+Plan: 3 of N in current phase
 Status: In progress
-Last activity: 2026-03-05 -- Completed 03-04 (template namespace placeholders)
+Last activity: 2026-03-05 -- Completed 03-03 (remaining workflow refs replaced)
 
 Progress: [████████░░] 80%
 
@@ -58,6 +58,8 @@ Progress: [████████░░] 80%
 | Phase 03-workflow-updates P04 | 8min | 2 tasks | 18 files |
 | Phase 03 P02 | 11min | 2 tasks | 8 files |
 | Phase 03 P01 | 12min | 2 tasks | 3 files |
+| Phase 03 P03 | 18min | 2 tasks | 21 files |
+| Phase 04-migration-system P01 | 5min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -86,6 +88,10 @@ Recent decisions affecting current work:
 - [Phase 03-04]: All template .planning/ refs replaced with ${planning_root}/${phase_dir} variable placeholders — consuming workflows populate via string interpolation at render time
 - [Phase 03]: map-codebase uses ${codebase_dir} from init; execute-plan extracts planning_root for metadata paths; progress uses ${phase_dir} for file listing
 - [Phase 03]: Added planning_root to init extraction and init calls to workflow starts for early path access
+- [Phase 03]: help.md uses state load (lightest init) for documentation path display
+- [Phase 03]: No-init workflows matched to domain: phase-op for phase workflows, milestone-op for milestone workflows, state load for config/general workflows
+- [Phase 04]: RESERVED_SLUGS set includes phases, milestones, codebase, config, .gitignore, .active
+- [Phase 04]: validateMigration internal-only function, tested indirectly through cmdMigrate
 
 ### Pending Todos
 
@@ -98,6 +104,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-05T21:12:11.475Z
-Stopped at: Completed 03-01-PLAN.md
+Last session: 2026-03-06T00:59:23.025Z
+Stopped at: Completed 04-01-PLAN.md
 Resume file: None
