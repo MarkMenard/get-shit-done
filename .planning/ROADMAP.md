@@ -78,11 +78,11 @@ Plans:
   2. User is prompted with a project name and offered migration (not silent, not forced)
   3. After accepting migration, all planning files exist under `.planning/<slug>/` with structure preserved
   4. Post-migration, all gsd-tools commands work against the migrated namespace without manual fixes
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 04-01: TBD
-- [ ] 04-02: TBD
+- [ ] 04-01-PLAN.md — migration.cjs module: detectFlatLayout, cmdMigrate, validateMigration (TDD)
+- [ ] 04-02-PLAN.md — Wire detection into init functions + migrate command in router
 
 ### Phase 5: Multi-Project Support
 **Goal**: Multiple project namespaces coexist under `.planning/` with clear selection and listing
