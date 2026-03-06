@@ -230,6 +230,103 @@ describe('cmdMigrate', () => {
   });
 });
 
+// ─── init migration interception tests ──────────────────────────────────────
+
+describe('init migration interception', () => {
+  let tmpDir;
+
+  afterEach(() => {
+    if (tmpDir) cleanup(tmpDir);
+    tmpDir = null;
+  });
+
+  test('init execute-phase on flat layout returns needs_migration', () => {
+    tmpDir = createTempFlatProject();
+    const result = runGsdTools('init execute-phase 01', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+
+    const output = JSON.parse(result.output);
+    assert.strictEqual(output.needs_migration, true);
+    assert.ok(output.suggested_slug);
+  });
+
+  test('init plan-phase on flat layout returns needs_migration', () => {
+    tmpDir = createTempFlatProject();
+    const result = runGsdTools('init plan-phase 01', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+
+    const output = JSON.parse(result.output);
+    assert.strictEqual(output.needs_migration, true);
+  });
+
+  test('init progress on flat layout returns needs_migration', () => {
+    tmpDir = createTempFlatProject();
+    const result = runGsdTools('init progress', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+
+    const output = JSON.parse(result.output);
+    assert.strictEqual(output.needs_migration, true);
+  });
+
+  test('init after migration returns normal output', () => {
+    tmpDir = createTempFlatProject();
+
+    // Perform migration
+    const migrateResult = runGsdTools('migrate my-project', tmpDir);
+    assert.ok(migrateResult.success, `Migration failed: ${migrateResult.error}`);
+
+    // Now init progress should return normal output
+    const result = runGsdTools('init progress', tmpDir);
+    assert.ok(result.success, `Init failed: ${result.error}`);
+
+    const output = JSON.parse(result.output);
+    assert.ok(!output.needs_migration, 'Should not have needs_migration after migration');
+    assert.ok(output.planning_root, 'Should have planning_root field (normal init output)');
+  });
+
+  test('migrate command end-to-end', () => {
+    tmpDir = createTempFlatProject();
+    const result = runGsdTools('migrate test-project', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+
+    const output = JSON.parse(result.output);
+    assert.strictEqual(output.migrated, true);
+    assert.ok(output.entries_moved > 0);
+
+    // Verify files exist at .planning/test-project/
+    assert.ok(fs.existsSync(path.join(tmpDir, '.planning', 'test-project', 'PROJECT.md')));
+    assert.ok(fs.existsSync(path.join(tmpDir, '.planning', 'test-project', 'ROADMAP.md')));
+    assert.ok(fs.existsSync(path.join(tmpDir, '.planning', 'test-project', 'STATE.md')));
+    assert.ok(fs.existsSync(path.join(tmpDir, '.planning', 'test-project', 'config.json')));
+    assert.ok(fs.existsSync(path.join(tmpDir, '.planning', 'test-project', 'phases', '01-setup', '01-01-PLAN.md')));
+
+    // Verify .active file contains "test-project"
+    const activeContent = fs.readFileSync(path.join(tmpDir, '.planning', '.active'), 'utf-8').trim();
+    assert.strictEqual(activeContent, 'test-project');
+
+    // Verify .gitignore still at .planning/ root (not moved into namespace)
+    // Note: .gitignore may or may not exist, but if it does it should be at root
+    // The createTempFlatProject doesn't create .gitignore by default, but the migration
+    // creates one via writeActiveFile
+  });
+
+  test('migrate command idempotent', () => {
+    tmpDir = createTempFlatProject();
+
+    // First migration
+    const first = runGsdTools('migrate test-project', tmpDir);
+    assert.ok(first.success, `First migration failed: ${first.error}`);
+
+    // Second migration
+    const second = runGsdTools('migrate test-project', tmpDir);
+    assert.ok(second.success, `Second migration failed: ${second.error}`);
+
+    const output = JSON.parse(second.output);
+    assert.strictEqual(output.migrated, false);
+    assert.strictEqual(output.reason, 'already_namespaced');
+  });
+});
+
 // ─── validateMigration tests (indirect through cmdMigrate output) ───────────
 
 describe('validateMigration', () => {
