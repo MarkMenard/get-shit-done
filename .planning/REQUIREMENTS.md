@@ -39,10 +39,10 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Multi-Project
 
-- [ ] **MULT-01**: Multiple project namespaces can coexist under `.planning/` simultaneously
+- [x] **MULT-01**: Multiple project namespaces can coexist under `.planning/` simultaneously
 - [ ] **MULT-02**: `gsd-tools init` identifies which project to operate on (from slug in config or user selection)
-- [ ] **MULT-03**: Clear error message when no project is selected or slug is ambiguous
-- [ ] **MULT-04**: Project listing: user can see all namespaces under `.planning/`
+- [x] **MULT-03**: Clear error message when no project is selected or slug is ambiguous
+- [x] **MULT-04**: Project listing: user can see all namespaces under `.planning/`
 
 ### Validation
 
@@ -90,10 +90,10 @@ Requirements for initial release. Each maps to roadmap phases.
 | TOOL-03 | Phase 2 | Complete |
 | TOOL-04 | Phase 2 | Complete |
 | TOOL-05 | Phase 2 | Complete |
-| MULT-01 | Phase 5 | Pending |
+| MULT-01 | Phase 5 | Complete |
 | MULT-02 | Phase 5 | Pending |
-| MULT-03 | Phase 5 | Pending |
-| MULT-04 | Phase 5 | Pending |
+| MULT-03 | Phase 5 | Complete |
+| MULT-04 | Phase 5 | Complete |
 | VALD-01 | Phase 6 | Pending |
 | VALD-02 | Phase 6 | Pending |
 | VALD-03 | Phase 6 | Pending |

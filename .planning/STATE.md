@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 04-02-PLAN.md
-last_updated: "2026-03-06T01:07:03.842Z"
+stopped_at: Completed 05-01-PLAN.md
+last_updated: "2026-03-09T03:43:09.006Z"
 last_activity: 2026-03-05 -- Completed 03-03 (remaining workflow refs replaced)
 progress:
   total_phases: 6
   completed_phases: 4
-  total_plans: 11
-  completed_plans: 11
+  total_plans: 13
+  completed_plans: 12
   percent: 80
 ---
 
@@ -61,6 +61,7 @@ Progress: [████████░░] 80%
 | Phase 03 P03 | 18min | 2 tasks | 21 files |
 | Phase 04-migration-system P01 | 5min | 2 tasks | 3 files |
 | Phase 04-migration-system P02 | 5min | 2 tasks | 2 files |
+| Phase 05 P01 | 4min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -95,6 +96,9 @@ Recent decisions affecting current work:
 - [Phase 04]: validateMigration internal-only function, tested indirectly through cmdMigrate
 - [Phase 04]: cmdInitNewProject excluded from migration detection -- new projects should initialize even on flat layouts
 - [Phase 04]: Migration detection placed before argument validation so it fires unconditionally
+- [Phase 05]: listNamespaces requires PROJECT.md as namespace marker
+- [Phase 05]: detectNeedsSelection auto-writes .active silently for single-namespace repos
+- [Phase 05]: cmdListProjects reuses listNamespaces from core.cjs rather than duplicating logic
 
 ### Pending Todos
 
@@ -107,6 +111,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-06T01:07:03.840Z
-Stopped at: Completed 04-02-PLAN.md
+Last session: 2026-03-09T03:43:09.002Z
+Stopped at: Completed 05-01-PLAN.md
 Resume file: None
