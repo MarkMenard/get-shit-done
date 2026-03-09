@@ -856,6 +856,7 @@ describe('namespace-aware init', () => {
     fs.writeFileSync(path.join(tmpDir, '.planning', '.active'), 'my-project', 'utf-8');
     // Create namespaced structure
     fs.mkdirSync(path.join(tmpDir, '.planning', 'my-project', 'phases', '03-api'), { recursive: true });
+    fs.writeFileSync(path.join(tmpDir, '.planning', 'my-project', 'PROJECT.md'), '# My Project\n\nDescription.\n');
     fs.writeFileSync(path.join(tmpDir, '.planning', 'my-project', 'phases', '03-api', '03-01-PLAN.md'), '# Plan');
     fs.writeFileSync(
       path.join(tmpDir, '.planning', 'my-project', 'STATE.md'),

@@ -5,13 +5,19 @@
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
-const { loadConfig, resolveModelInternal, findPhaseInternal, getRoadmapPhaseInternal, pathExistsInternal, generateSlugInternal, getMilestoneInfo, normalizePhaseName, toPosixPath, planningRoot, output, error } = require('./core.cjs');
+const { loadConfig, resolveModelInternal, findPhaseInternal, getRoadmapPhaseInternal, pathExistsInternal, generateSlugInternal, getMilestoneInfo, normalizePhaseName, toPosixPath, planningRoot, output, error, detectNeedsSelection, listNamespaces } = require('./core.cjs');
 const { detectFlatLayout } = require('./migration.cjs');
 
 function cmdInitExecutePhase(cwd, phase, raw) {
   const migration = detectFlatLayout(cwd);
   if (migration.needs_migration) {
     output(migration, raw);
+    return;
+  }
+
+  const selection = detectNeedsSelection(cwd);
+  if (selection.needs_selection) {
+    output(selection, raw);
     return;
   }
 
@@ -96,6 +102,12 @@ function cmdInitPlanPhase(cwd, phase, raw) {
   const migration = detectFlatLayout(cwd);
   if (migration.needs_migration) {
     output(migration, raw);
+    return;
+  }
+
+  const selection = detectNeedsSelection(cwd);
+  if (selection.needs_selection) {
+    output(selection, raw);
     return;
   }
 
@@ -243,6 +255,10 @@ function cmdInitNewProject(cwd, raw) {
     project_path: `${rootRel}/PROJECT.md`,
   };
 
+  const namespaces = listNamespaces(cwd);
+  result.existing_projects = namespaces;
+  result.existing_count = namespaces.length;
+
   output(result, raw);
 }
 
@@ -250,6 +266,12 @@ function cmdInitNewMilestone(cwd, raw) {
   const migration = detectFlatLayout(cwd);
   if (migration.needs_migration) {
     output(migration, raw);
+    return;
+  }
+
+  const selection = detectNeedsSelection(cwd);
+  if (selection.needs_selection) {
+    output(selection, raw);
     return;
   }
 
@@ -293,6 +315,12 @@ function cmdInitQuick(cwd, description, raw) {
   const migration = detectFlatLayout(cwd);
   if (migration.needs_migration) {
     output(migration, raw);
+    return;
+  }
+
+  const selection = detectNeedsSelection(cwd);
+  if (selection.needs_selection) {
+    output(selection, raw);
     return;
   }
 
@@ -357,6 +385,12 @@ function cmdInitResume(cwd, raw) {
     return;
   }
 
+  const selection = detectNeedsSelection(cwd);
+  if (selection.needs_selection) {
+    output(selection, raw);
+    return;
+  }
+
   const root = planningRoot(cwd);
   const rootRel = toPosixPath(path.relative(cwd, root));
   const config = loadConfig(cwd);
@@ -400,6 +434,12 @@ function cmdInitVerifyWork(cwd, phase, raw) {
     return;
   }
 
+  const selection = detectNeedsSelection(cwd);
+  if (selection.needs_selection) {
+    output(selection, raw);
+    return;
+  }
+
   if (!phase) {
     error('phase required for init verify-work');
   }
@@ -437,6 +477,12 @@ function cmdInitPhaseOp(cwd, phase, raw) {
   const migration = detectFlatLayout(cwd);
   if (migration.needs_migration) {
     output(migration, raw);
+    return;
+  }
+
+  const selection = detectNeedsSelection(cwd);
+  if (selection.needs_selection) {
+    output(selection, raw);
     return;
   }
 
@@ -532,6 +578,12 @@ function cmdInitTodos(cwd, area, raw) {
     return;
   }
 
+  const selection = detectNeedsSelection(cwd);
+  if (selection.needs_selection) {
+    output(selection, raw);
+    return;
+  }
+
   const root = planningRoot(cwd);
   const rootRel = toPosixPath(path.relative(cwd, root));
   const config = loadConfig(cwd);
@@ -599,6 +651,12 @@ function cmdInitMilestoneOp(cwd, raw) {
   const migration = detectFlatLayout(cwd);
   if (migration.needs_migration) {
     output(migration, raw);
+    return;
+  }
+
+  const selection = detectNeedsSelection(cwd);
+  if (selection.needs_selection) {
+    output(selection, raw);
     return;
   }
 
@@ -674,6 +732,12 @@ function cmdInitMapCodebase(cwd, raw) {
     return;
   }
 
+  const selection = detectNeedsSelection(cwd);
+  if (selection.needs_selection) {
+    output(selection, raw);
+    return;
+  }
+
   const root = planningRoot(cwd);
   const rootRel = toPosixPath(path.relative(cwd, root));
   const config = loadConfig(cwd);
@@ -716,6 +780,12 @@ function cmdInitProgress(cwd, raw) {
   const migration = detectFlatLayout(cwd);
   if (migration.needs_migration) {
     output(migration, raw);
+    return;
+  }
+
+  const selection = detectNeedsSelection(cwd);
+  if (selection.needs_selection) {
+    output(selection, raw);
     return;
   }
 
