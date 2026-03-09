@@ -356,3 +356,77 @@ describe('validateMigration', () => {
     assert.strictEqual(output.validation.planning_root_resolved, true);
   });
 });
+
+// ─── post-migration init validation (VALD-03) ──────────────────────────────
+
+describe('post-migration init validation', () => {
+  let tmpDir;
+
+  afterEach(() => {
+    if (tmpDir) cleanup(tmpDir);
+    tmpDir = null;
+  });
+
+  test('init commands return namespaced paths after migration', () => {
+    // 1. Create flat layout
+    tmpDir = createTempFlatProject();
+
+    // 2. Run migration
+    const migrateResult = runGsdTools('migrate test-proj', tmpDir);
+    assert.ok(migrateResult.success, `Migration failed: ${migrateResult.error}`);
+
+    // 3. Verify filesystem post-migration
+    assert.ok(fs.existsSync(path.join(tmpDir, '.planning', 'test-proj')),
+      '.planning/test-proj/ should exist');
+    assert.ok(fs.existsSync(path.join(tmpDir, '.planning', 'test-proj', 'PROJECT.md')),
+      'PROJECT.md should exist in namespace');
+    assert.ok(fs.existsSync(path.join(tmpDir, '.planning', 'test-proj', 'ROADMAP.md')),
+      'ROADMAP.md should exist in namespace');
+
+    const active = fs.readFileSync(path.join(tmpDir, '.planning', '.active'), 'utf-8').trim();
+    assert.strictEqual(active, 'test-proj', '.active should contain test-proj');
+
+    // 4. Run init progress - should return namespaced paths
+    const progressResult = runGsdTools('init progress', tmpDir);
+    assert.ok(progressResult.success, `init progress failed: ${progressResult.error}`);
+
+    const progressOutput = JSON.parse(progressResult.output);
+    assert.ok(
+      progressOutput.planning_root.includes('test-proj'),
+      `planning_root should include "test-proj", got: ${progressOutput.planning_root}`
+    );
+    assert.ok(
+      !progressOutput.needs_migration,
+      'Should not have needs_migration after migration'
+    );
+    assert.ok(
+      !progressOutput.needs_selection,
+      'Should not have needs_selection after migration (single namespace with .active)'
+    );
+
+    // 5. Run init new-milestone - should return namespaced paths
+    const milestoneResult = runGsdTools('init new-milestone', tmpDir);
+    assert.ok(milestoneResult.success, `init new-milestone failed: ${milestoneResult.error}`);
+
+    const milestoneOutput = JSON.parse(milestoneResult.output);
+    assert.ok(
+      milestoneOutput.planning_root.includes('test-proj'),
+      `new-milestone planning_root should include "test-proj", got: ${milestoneOutput.planning_root}`
+    );
+  });
+
+  test('migrated namespace appears in list-projects', () => {
+    // 1. Create flat layout and migrate
+    tmpDir = createTempFlatProject();
+    const migrateResult = runGsdTools('migrate test-proj', tmpDir);
+    assert.ok(migrateResult.success, `Migration failed: ${migrateResult.error}`);
+
+    // 2. Run list-projects
+    const listResult = runGsdTools('list-projects', tmpDir);
+    assert.ok(listResult.success, `list-projects failed: ${listResult.error}`);
+    assert.ok(
+      listResult.output.includes('test-proj'),
+      `list-projects output should include "test-proj", got: ${listResult.output}`
+    );
+  });
+});
