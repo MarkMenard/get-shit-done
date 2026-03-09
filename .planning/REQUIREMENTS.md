@@ -18,7 +18,7 @@ Requirements for initial release. Each maps to roadmap phases.
 ### Migration
 
 - [x] **MIGR-01**: System detects flat `.planning/` layout (files at root, no slug subdirectory)
-- [ ] **MIGR-02**: On detection, user is prompted with project name and migration offer
+- [x] **MIGR-02**: On detection, user is prompted with project name and migration offer
 - [x] **MIGR-03**: Migration moves all planning files into `.planning/<slug>/` preserving structure
 - [x] **MIGR-04**: Post-migration validation confirms all files accessible at new paths
 
@@ -78,7 +78,7 @@ Requirements for initial release. Each maps to roadmap phases.
 | PATH-04 | Phase 1 | Complete |
 | PATH-05 | Phase 2 | Complete |
 | MIGR-01 | Phase 4 | Complete |
-| MIGR-02 | Phase 4 | Pending |
+| MIGR-02 | Phase 4 | Complete |
 | MIGR-03 | Phase 4 | Complete |
 | MIGR-04 | Phase 4 | Complete |
 | WORK-01 | Phase 3 | Complete |

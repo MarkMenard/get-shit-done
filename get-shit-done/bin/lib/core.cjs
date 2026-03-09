@@ -159,6 +159,87 @@ function loadConfig(cwd) {
   }
 }
 
+// ─── Multi-project namespace utilities ────────────────────────────────────────
+
+/**
+ * List all namespace directories under .planning/ that contain a PROJECT.md.
+ * Returns [{slug, name}] sorted alphabetically by slug.
+ * Skips dot-directories and directories without PROJECT.md.
+ */
+function listNamespaces(cwd) {
+  const planningDir = path.join(cwd, '.planning');
+  try {
+    const entries = fs.readdirSync(planningDir, { withFileTypes: true });
+    const namespaces = [];
+    for (const entry of entries) {
+      if (!entry.isDirectory() || entry.name.startsWith('.')) continue;
+      const projectMdPath = path.join(planningDir, entry.name, 'PROJECT.md');
+      const content = safeReadFile(projectMdPath);
+      if (content === null) continue;
+      const h1Match = content.match(/^#\s+(.+)/m);
+      namespaces.push({
+        slug: entry.name,
+        name: h1Match ? h1Match[1].trim() : entry.name,
+      });
+    }
+    namespaces.sort((a, b) => a.slug.localeCompare(b.slug));
+    return namespaces;
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Detect whether the user needs to select a project namespace.
+ *
+ * Returns:
+ * - {needs_selection: false} when no .planning/, valid .active, 0 namespaces, or auto-selected single namespace
+ * - {needs_selection: true, reason: 'stale_active', stale_slug, available_projects} when .active points to non-existent dir
+ * - {needs_selection: true, reason: 'no_active', available_projects} when 2+ namespaces and no .active
+ */
+function detectNeedsSelection(cwd) {
+  const planningDir = path.join(cwd, '.planning');
+  try {
+    fs.statSync(planningDir);
+  } catch {
+    return { needs_selection: false };
+  }
+
+  const activeContent = safeReadFile(path.join(planningDir, '.active'));
+  const activeSlug = activeContent ? activeContent.trim() : null;
+
+  if (activeSlug) {
+    // Check if active slug points to valid namespace (dir with PROJECT.md)
+    const projectMd = safeReadFile(path.join(planningDir, activeSlug, 'PROJECT.md'));
+    if (projectMd !== null) {
+      return { needs_selection: false };
+    }
+    // Stale .active
+    const available = listNamespaces(cwd);
+    return {
+      needs_selection: true,
+      reason: 'stale_active',
+      stale_slug: activeSlug,
+      available_projects: available,
+    };
+  }
+
+  // No .active file
+  const namespaces = listNamespaces(cwd);
+  if (namespaces.length === 0) {
+    return { needs_selection: false };
+  }
+  if (namespaces.length === 1) {
+    writeActiveFile(cwd, namespaces[0].slug);
+    return { needs_selection: false };
+  }
+  return {
+    needs_selection: true,
+    reason: 'no_active',
+    available_projects: namespaces,
+  };
+}
+
 // ─── Git utilities ────────────────────────────────────────────────────────────
 
 function isGitIgnored(cwd, targetPath) {
@@ -528,4 +609,6 @@ module.exports = {
   getMilestoneInfo,
   getMilestonePhaseFilter,
   toPosixPath,
+  listNamespaces,
+  detectNeedsSelection,
 };

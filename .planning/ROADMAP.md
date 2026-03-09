@@ -93,11 +93,11 @@ Plans:
   2. `gsd-tools init` correctly identifies which project to operate on (via slug in config or user selection)
   3. When no project is selected or the slug is ambiguous, a clear error message tells the user what to do
   4. User can list all project namespaces under `.planning/` and see their names
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 05-01: TBD
-- [ ] 05-02: TBD
+- [ ] 05-01-PLAN.md — Core functions (listNamespaces, detectNeedsSelection, cmdListProjects) + CLI routing (TDD)
+- [ ] 05-02-PLAN.md — Wire selection into init functions + cmdInitNewProject updates + switch-project workflow (TDD)
 
 ### Phase 6: Validation and Self-Hosting
 **Goal**: The entire namespaced system is proven to work end-to-end, including migration and self-hosting

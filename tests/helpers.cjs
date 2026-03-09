@@ -68,8 +68,27 @@ function createTempGitProject() {
   return tmpDir;
 }
 
+/**
+ * Create temp directory with multi-project namespace structure.
+ * Each project gets .planning/project-{i}/ with PROJECT.md and config.json.
+ *
+ * @param {number} count - Number of projects to create (default 2)
+ * @returns {string} tmpDir path
+ */
+function createTempMultiProject(count = 2) {
+  const tmpDir = fs.mkdtempSync(path.join(require('os').tmpdir(), 'gsd-test-multi-'));
+  fs.mkdirSync(path.join(tmpDir, '.planning'), { recursive: true });
+  for (let i = 1; i <= count; i++) {
+    const projDir = path.join(tmpDir, '.planning', `project-${i}`);
+    fs.mkdirSync(path.join(projDir, 'phases'), { recursive: true });
+    fs.writeFileSync(path.join(projDir, 'PROJECT.md'), `# Project ${i}\n\nDescription for project ${i}.\n`);
+    fs.writeFileSync(path.join(projDir, 'config.json'), JSON.stringify({ project_slug: `project-${i}` }, null, 2));
+  }
+  return tmpDir;
+}
+
 function cleanup(tmpDir) {
   fs.rmSync(tmpDir, { recursive: true, force: true });
 }
 
-module.exports = { runGsdTools, createTempProject, createTempGitProject, cleanup, TOOLS_PATH };
+module.exports = { runGsdTools, createTempProject, createTempGitProject, createTempMultiProject, cleanup, TOOLS_PATH };

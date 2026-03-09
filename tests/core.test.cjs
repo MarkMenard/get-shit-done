@@ -29,7 +29,10 @@ const {
   getArchivedPhaseDirs,
   planningRoot,
   writeActiveFile,
+  listNamespaces,
+  detectNeedsSelection,
 } = require('../get-shit-done/bin/lib/core.cjs');
+const { createTempMultiProject, cleanup } = require('./helpers.cjs');
 
 // ─── loadConfig ────────────────────────────────────────────────────────────────
 
@@ -1016,5 +1019,144 @@ describe('writeActiveFile', () => {
     writeActiveFile(tmpDir, 'second');
     const content = fs.readFileSync(path.join(tmpDir, '.planning', '.active'), 'utf-8');
     assert.strictEqual(content, 'second');
+  });
+});
+
+// ─── listNamespaces ─────────────────────────────────────────────────────────
+
+describe('listNamespaces', () => {
+  let tmpDir;
+
+  afterEach(() => {
+    if (tmpDir) cleanup(tmpDir);
+  });
+
+  test('returns empty array when .planning/ does not exist', () => {
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'gsd-core-test-'));
+    const result = listNamespaces(tmpDir);
+    assert.deepStrictEqual(result, []);
+  });
+
+  test('returns empty array when .planning/ has no subdirs with PROJECT.md', () => {
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'gsd-core-test-'));
+    fs.mkdirSync(path.join(tmpDir, '.planning'), { recursive: true });
+    // Create a subdir without PROJECT.md
+    fs.mkdirSync(path.join(tmpDir, '.planning', 'some-dir'));
+    const result = listNamespaces(tmpDir);
+    assert.deepStrictEqual(result, []);
+  });
+
+  test('returns [{slug, name}] for each subdir containing PROJECT.md', () => {
+    tmpDir = createTempMultiProject(2);
+    const result = listNamespaces(tmpDir);
+    assert.strictEqual(result.length, 2);
+    assert.strictEqual(result[0].slug, 'project-1');
+    assert.strictEqual(result[0].name, 'Project 1');
+    assert.strictEqual(result[1].slug, 'project-2');
+    assert.strictEqual(result[1].name, 'Project 2');
+  });
+
+  test('skips dot-directories', () => {
+    tmpDir = createTempMultiProject(1);
+    // Create dot-dirs that should be ignored
+    fs.mkdirSync(path.join(tmpDir, '.planning', '.active-dir'));
+    fs.writeFileSync(path.join(tmpDir, '.planning', '.active-dir', 'PROJECT.md'), '# Dot Dir');
+    const result = listNamespaces(tmpDir);
+    assert.strictEqual(result.length, 1);
+    assert.strictEqual(result[0].slug, 'project-1');
+  });
+
+  test('skips directories without PROJECT.md', () => {
+    tmpDir = createTempMultiProject(1);
+    // Add a dir without PROJECT.md
+    fs.mkdirSync(path.join(tmpDir, '.planning', 'partial-dir'));
+    const result = listNamespaces(tmpDir);
+    assert.strictEqual(result.length, 1);
+    assert.strictEqual(result[0].slug, 'project-1');
+  });
+
+  test('parses H1 from PROJECT.md for name, falls back to slug', () => {
+    tmpDir = createTempMultiProject(1);
+    // Create a project with no H1 in PROJECT.md
+    fs.mkdirSync(path.join(tmpDir, '.planning', 'no-heading'));
+    fs.writeFileSync(path.join(tmpDir, '.planning', 'no-heading', 'PROJECT.md'), 'Just some text\n');
+    const result = listNamespaces(tmpDir);
+    const noHeading = result.find(ns => ns.slug === 'no-heading');
+    assert.ok(noHeading);
+    assert.strictEqual(noHeading.name, 'no-heading'); // falls back to slug
+  });
+
+  test('sorts alphabetically by slug', () => {
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'gsd-core-test-'));
+    fs.mkdirSync(path.join(tmpDir, '.planning'), { recursive: true });
+    // Create in reverse order
+    for (const name of ['zeta', 'alpha', 'mid']) {
+      const dir = path.join(tmpDir, '.planning', name);
+      fs.mkdirSync(dir);
+      fs.writeFileSync(path.join(dir, 'PROJECT.md'), `# ${name}\n`);
+    }
+    const result = listNamespaces(tmpDir);
+    assert.deepStrictEqual(result.map(ns => ns.slug), ['alpha', 'mid', 'zeta']);
+  });
+});
+
+// ─── detectNeedsSelection ───────────────────────────────────────────────────
+
+describe('detectNeedsSelection', () => {
+  let tmpDir;
+
+  afterEach(() => {
+    if (tmpDir) cleanup(tmpDir);
+  });
+
+  test('returns {needs_selection: false} when no .planning/ exists', () => {
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'gsd-core-test-'));
+    const result = detectNeedsSelection(tmpDir);
+    assert.strictEqual(result.needs_selection, false);
+  });
+
+  test('returns {needs_selection: false} when .active points to valid namespace', () => {
+    tmpDir = createTempMultiProject(2);
+    fs.writeFileSync(path.join(tmpDir, '.planning', '.active'), 'project-1');
+    const result = detectNeedsSelection(tmpDir);
+    assert.strictEqual(result.needs_selection, false);
+  });
+
+  test('returns {needs_selection: true, reason: stale_active} when .active points to non-existent dir', () => {
+    tmpDir = createTempMultiProject(2);
+    fs.writeFileSync(path.join(tmpDir, '.planning', '.active'), 'deleted-project');
+    const result = detectNeedsSelection(tmpDir);
+    assert.strictEqual(result.needs_selection, true);
+    assert.strictEqual(result.reason, 'stale_active');
+    assert.strictEqual(result.stale_slug, 'deleted-project');
+    assert.ok(Array.isArray(result.available_projects));
+    assert.strictEqual(result.available_projects.length, 2);
+  });
+
+  test('returns {needs_selection: false} when 0 namespaces exist (no .active)', () => {
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'gsd-core-test-'));
+    fs.mkdirSync(path.join(tmpDir, '.planning'), { recursive: true });
+    const result = detectNeedsSelection(tmpDir);
+    assert.strictEqual(result.needs_selection, false);
+  });
+
+  test('auto-writes .active and returns {needs_selection: false} when exactly 1 namespace exists (no .active)', () => {
+    tmpDir = createTempMultiProject(1);
+    // No .active file
+    const result = detectNeedsSelection(tmpDir);
+    assert.strictEqual(result.needs_selection, false);
+    // Check .active was written
+    const active = fs.readFileSync(path.join(tmpDir, '.planning', '.active'), 'utf-8');
+    assert.strictEqual(active, 'project-1');
+  });
+
+  test('returns {needs_selection: true, reason: no_active} when 2+ namespaces exist (no .active)', () => {
+    tmpDir = createTempMultiProject(2);
+    // No .active file
+    const result = detectNeedsSelection(tmpDir);
+    assert.strictEqual(result.needs_selection, true);
+    assert.strictEqual(result.reason, 'no_active');
+    assert.ok(Array.isArray(result.available_projects));
+    assert.strictEqual(result.available_projects.length, 2);
   });
 });
