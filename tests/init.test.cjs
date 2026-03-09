@@ -101,9 +101,13 @@ describe('init commands', () => {
   // ── phase_req_ids extraction (fix for #684) ──────────────────────────────
 
   test('init plan-phase extracts phase_req_ids from ROADMAP', () => {
-    fs.mkdirSync(path.join(tmpDir, '.planning', 'phases', '03-api'), { recursive: true });
+    const slug = 'test-project';
+    const ns = path.join(tmpDir, '.planning', slug);
+    fs.mkdirSync(path.join(ns, 'phases', '03-api'), { recursive: true });
+    fs.writeFileSync(path.join(tmpDir, '.planning', '.active'), slug);
+    fs.writeFileSync(path.join(ns, 'PROJECT.md'), '# Test Project\n');
     fs.writeFileSync(
-      path.join(tmpDir, '.planning', 'ROADMAP.md'),
+      path.join(ns, 'ROADMAP.md'),
       `# Roadmap\n\n### Phase 3: API\n**Goal:** Build API\n**Requirements**: CP-01, CP-02, CP-03\n**Plans:** 0 plans\n`
     );
 
@@ -115,9 +119,13 @@ describe('init commands', () => {
   });
 
   test('init plan-phase strips brackets from phase_req_ids', () => {
-    fs.mkdirSync(path.join(tmpDir, '.planning', 'phases', '03-api'), { recursive: true });
+    const slug = 'test-project';
+    const ns = path.join(tmpDir, '.planning', slug);
+    fs.mkdirSync(path.join(ns, 'phases', '03-api'), { recursive: true });
+    fs.writeFileSync(path.join(tmpDir, '.planning', '.active'), slug);
+    fs.writeFileSync(path.join(ns, 'PROJECT.md'), '# Test Project\n');
     fs.writeFileSync(
-      path.join(tmpDir, '.planning', 'ROADMAP.md'),
+      path.join(ns, 'ROADMAP.md'),
       `# Roadmap\n\n### Phase 3: API\n**Goal:** Build API\n**Requirements**: [CP-01, CP-02]\n**Plans:** 0 plans\n`
     );
 
@@ -129,9 +137,13 @@ describe('init commands', () => {
   });
 
   test('init plan-phase returns null phase_req_ids when Requirements line is absent', () => {
-    fs.mkdirSync(path.join(tmpDir, '.planning', 'phases', '03-api'), { recursive: true });
+    const slug = 'test-project';
+    const ns = path.join(tmpDir, '.planning', slug);
+    fs.mkdirSync(path.join(ns, 'phases', '03-api'), { recursive: true });
+    fs.writeFileSync(path.join(tmpDir, '.planning', '.active'), slug);
+    fs.writeFileSync(path.join(ns, 'PROJECT.md'), '# Test Project\n');
     fs.writeFileSync(
-      path.join(tmpDir, '.planning', 'ROADMAP.md'),
+      path.join(ns, 'ROADMAP.md'),
       `# Roadmap\n\n### Phase 3: API\n**Goal:** Build API\n**Plans:** 0 plans\n`
     );
 
@@ -153,11 +165,15 @@ describe('init commands', () => {
   });
 
   test('init execute-phase extracts phase_req_ids from ROADMAP', () => {
-    const phaseDir = path.join(tmpDir, '.planning', 'phases', '03-api');
+    const slug = 'test-project';
+    const ns = path.join(tmpDir, '.planning', slug);
+    const phaseDir = path.join(ns, 'phases', '03-api');
     fs.mkdirSync(phaseDir, { recursive: true });
+    fs.writeFileSync(path.join(tmpDir, '.planning', '.active'), slug);
+    fs.writeFileSync(path.join(ns, 'PROJECT.md'), '# Test Project\n');
     fs.writeFileSync(path.join(phaseDir, '03-01-PLAN.md'), '# Plan');
     fs.writeFileSync(
-      path.join(tmpDir, '.planning', 'ROADMAP.md'),
+      path.join(ns, 'ROADMAP.md'),
       `# Roadmap\n\n### Phase 3: API\n**Goal:** Build API\n**Requirements**: EX-01, EX-02\n**Plans:** 1 plans\n`
     );
 
@@ -169,9 +185,13 @@ describe('init commands', () => {
   });
 
   test('init plan-phase returns null phase_req_ids when value is TBD', () => {
-    fs.mkdirSync(path.join(tmpDir, '.planning', 'phases', '03-api'), { recursive: true });
+    const slug = 'test-project';
+    const ns = path.join(tmpDir, '.planning', slug);
+    fs.mkdirSync(path.join(ns, 'phases', '03-api'), { recursive: true });
+    fs.writeFileSync(path.join(tmpDir, '.planning', '.active'), slug);
+    fs.writeFileSync(path.join(ns, 'PROJECT.md'), '# Test Project\n');
     fs.writeFileSync(
-      path.join(tmpDir, '.planning', 'ROADMAP.md'),
+      path.join(ns, 'ROADMAP.md'),
       `# Roadmap\n\n### Phase 3: API\n**Goal:** Build API\n**Requirements**: TBD\n**Plans:** 0 plans\n`
     );
 
@@ -183,11 +203,15 @@ describe('init commands', () => {
   });
 
   test('init execute-phase returns null phase_req_ids when Requirements line is absent', () => {
-    const phaseDir = path.join(tmpDir, '.planning', 'phases', '03-api');
+    const slug = 'test-project';
+    const ns = path.join(tmpDir, '.planning', slug);
+    const phaseDir = path.join(ns, 'phases', '03-api');
     fs.mkdirSync(phaseDir, { recursive: true });
+    fs.writeFileSync(path.join(tmpDir, '.planning', '.active'), slug);
+    fs.writeFileSync(path.join(ns, 'PROJECT.md'), '# Test Project\n');
     fs.writeFileSync(path.join(phaseDir, '03-01-PLAN.md'), '# Plan');
     fs.writeFileSync(
-      path.join(tmpDir, '.planning', 'ROADMAP.md'),
+      path.join(ns, 'ROADMAP.md'),
       `# Roadmap\n\n### Phase 3: API\n**Goal:** Build API\n**Plans:** 1 plans\n`
     );
 
@@ -438,12 +462,16 @@ describe('cmdInitPhaseOp fallback', () => {
   });
 
   test('normal path with existing directory', () => {
-    const phaseDir = path.join(tmpDir, '.planning', 'phases', '03-api');
+    const slug = 'test-project';
+    const ns = path.join(tmpDir, '.planning', slug);
+    const phaseDir = path.join(ns, 'phases', '03-api');
     fs.mkdirSync(phaseDir, { recursive: true });
+    fs.writeFileSync(path.join(tmpDir, '.planning', '.active'), slug);
+    fs.writeFileSync(path.join(ns, 'PROJECT.md'), '# Test Project\n');
     fs.writeFileSync(path.join(phaseDir, '03-CONTEXT.md'), '# Context');
     fs.writeFileSync(path.join(phaseDir, '03-01-PLAN.md'), '# Plan');
     fs.writeFileSync(
-      path.join(tmpDir, '.planning', 'ROADMAP.md'),
+      path.join(ns, 'ROADMAP.md'),
       '# Roadmap\n\n### Phase 3: API\n**Goal:** Build API\n**Plans:** 1 plans\n'
     );
 
@@ -458,8 +486,13 @@ describe('cmdInitPhaseOp fallback', () => {
   });
 
   test('fallback to ROADMAP when no directory exists', () => {
+    const slug = 'test-project';
+    const ns = path.join(tmpDir, '.planning', slug);
+    fs.mkdirSync(path.join(ns, 'phases'), { recursive: true });
+    fs.writeFileSync(path.join(tmpDir, '.planning', '.active'), slug);
+    fs.writeFileSync(path.join(ns, 'PROJECT.md'), '# Test Project\n');
     fs.writeFileSync(
-      path.join(tmpDir, '.planning', 'ROADMAP.md'),
+      path.join(ns, 'ROADMAP.md'),
       '# Roadmap\n\n### Phase 5: Widget Builder\n**Goal:** Build widgets\n**Plans:** TBD\n'
     );
 
@@ -476,8 +509,13 @@ describe('cmdInitPhaseOp fallback', () => {
   });
 
   test('neither directory nor roadmap entry returns not found', () => {
+    const slug = 'test-project';
+    const ns = path.join(tmpDir, '.planning', slug);
+    fs.mkdirSync(path.join(ns, 'phases'), { recursive: true });
+    fs.writeFileSync(path.join(tmpDir, '.planning', '.active'), slug);
+    fs.writeFileSync(path.join(ns, 'PROJECT.md'), '# Test Project\n');
     fs.writeFileSync(
-      path.join(tmpDir, '.planning', 'ROADMAP.md'),
+      path.join(ns, 'ROADMAP.md'),
       '# Roadmap\n\n### Phase 1: Setup\n**Goal:** Setup project\n**Plans:** TBD\n'
     );
 
@@ -587,8 +625,13 @@ describe('cmdInitProgress', () => {
   });
 
   test('paused_at detected from STATE.md', () => {
+    const slug = 'test-project';
+    const ns = path.join(tmpDir, '.planning', slug);
+    fs.mkdirSync(path.join(ns, 'phases'), { recursive: true });
+    fs.writeFileSync(path.join(tmpDir, '.planning', '.active'), slug);
+    fs.writeFileSync(path.join(ns, 'PROJECT.md'), '# Test Project\n');
     fs.writeFileSync(
-      path.join(tmpDir, '.planning', 'STATE.md'),
+      path.join(ns, 'STATE.md'),
       '# Project State\n\n**Paused At:** Phase 2, Task 3 — implementing auth\n'
     );
 
@@ -601,8 +644,13 @@ describe('cmdInitProgress', () => {
   });
 
   test('no paused_at when STATE.md has no pause line', () => {
+    const slug = 'test-project';
+    const ns = path.join(tmpDir, '.planning', slug);
+    fs.mkdirSync(path.join(ns, 'phases'), { recursive: true });
+    fs.writeFileSync(path.join(tmpDir, '.planning', '.active'), slug);
+    fs.writeFileSync(path.join(ns, 'PROJECT.md'), '# Test Project\n');
     fs.writeFileSync(
-      path.join(tmpDir, '.planning', 'STATE.md'),
+      path.join(ns, 'STATE.md'),
       '# Project State\n\nSome content without pause.\n'
     );
 
@@ -819,19 +867,24 @@ describe('cmdInitNewMilestone', () => {
   });
 
   test('file existence flags reflect actual state', () => {
-    // Default: no STATE.md, ROADMAP.md, or PROJECT.md
+    const slug = 'test-project';
+    const ns = path.join(tmpDir, '.planning', slug);
+    fs.mkdirSync(path.join(ns, 'phases'), { recursive: true });
+    fs.writeFileSync(path.join(tmpDir, '.planning', '.active'), slug);
+    fs.writeFileSync(path.join(ns, 'PROJECT.md'), '# Test Project\n');
+
+    // Default: no STATE.md or ROADMAP.md (PROJECT.md exists for namespace)
     const result1 = runGsdTools('init new-milestone', tmpDir);
     assert.ok(result1.success, `Command failed: ${result1.error}`);
 
     const output1 = JSON.parse(result1.output);
     assert.strictEqual(output1.state_exists, false);
     assert.strictEqual(output1.roadmap_exists, false);
-    assert.strictEqual(output1.project_exists, false);
+    assert.strictEqual(output1.project_exists, true);
 
     // Create files and verify flags change
-    fs.writeFileSync(path.join(tmpDir, '.planning', 'STATE.md'), '# State');
-    fs.writeFileSync(path.join(tmpDir, '.planning', 'ROADMAP.md'), '# Roadmap');
-    fs.writeFileSync(path.join(tmpDir, '.planning', 'PROJECT.md'), '# Project');
+    fs.writeFileSync(path.join(ns, 'STATE.md'), '# State');
+    fs.writeFileSync(path.join(ns, 'ROADMAP.md'), '# Roadmap');
 
     const result2 = runGsdTools('init new-milestone', tmpDir);
     assert.ok(result2.success, `Command failed: ${result2.error}`);
