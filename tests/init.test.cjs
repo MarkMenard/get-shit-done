@@ -6,7 +6,7 @@ const { test, describe, beforeEach, afterEach } = require('node:test');
 const assert = require('node:assert');
 const fs = require('fs');
 const path = require('path');
-const { runGsdTools, createTempProject, cleanup } = require('./helpers.cjs');
+const { runGsdTools, createTempProject, createTempMultiProject, cleanup } = require('./helpers.cjs');
 
 describe('init commands', () => {
   let tmpDir;
@@ -972,6 +972,86 @@ describe('namespace-aware init', () => {
     } finally {
       cleanup(flatDir);
     }
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// init selection interception (Phase 5, Plan 2)
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('init selection interception', () => {
+  let tmpDir;
+
+  afterEach(() => {
+    cleanup(tmpDir);
+  });
+
+  test('cmdInitExecutePhase with 2 namespaces and no .active returns needs_selection', () => {
+    tmpDir = createTempMultiProject(2);
+    const result = runGsdTools(['init', 'execute-phase', '1'], tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+    const output = JSON.parse(result.output);
+    assert.strictEqual(output.needs_selection, true);
+    assert.ok(Array.isArray(output.available_projects), 'should have available_projects array');
+    assert.strictEqual(output.available_projects.length, 2);
+  });
+
+  test('cmdInitPlanPhase with 2 namespaces and no .active returns needs_selection', () => {
+    tmpDir = createTempMultiProject(2);
+    const result = runGsdTools(['init', 'plan-phase', '1'], tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+    const output = JSON.parse(result.output);
+    assert.strictEqual(output.needs_selection, true);
+    assert.ok(Array.isArray(output.available_projects));
+  });
+
+  test('cmdInitProgress with 2 namespaces and no .active returns needs_selection', () => {
+    tmpDir = createTempMultiProject(2);
+    const result = runGsdTools(['init', 'progress'], tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+    const output = JSON.parse(result.output);
+    assert.strictEqual(output.needs_selection, true);
+    assert.ok(Array.isArray(output.available_projects));
+  });
+
+  test('cmdInitNewProject with 2 namespaces and no .active does NOT return needs_selection', () => {
+    tmpDir = createTempMultiProject(2);
+    const result = runGsdTools(['init', 'new-project'], tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+    const output = JSON.parse(result.output);
+    assert.notStrictEqual(output.needs_selection, true, 'cmdInitNewProject should NOT trigger selection');
+  });
+
+  test('cmdInitNewProject returns existing_projects and existing_count', () => {
+    tmpDir = createTempMultiProject(2);
+    const result = runGsdTools(['init', 'new-project'], tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+    const output = JSON.parse(result.output);
+    assert.ok(Array.isArray(output.existing_projects), 'should have existing_projects array');
+    assert.strictEqual(output.existing_projects.length, 2);
+    assert.strictEqual(output.existing_count, 2);
+    // Verify each project has slug and name
+    for (const proj of output.existing_projects) {
+      assert.ok(proj.slug, 'each project should have a slug');
+      assert.ok(proj.name, 'each project should have a name');
+    }
+  });
+
+  test('init with valid .active proceeds normally (no selection interruption)', () => {
+    tmpDir = createTempMultiProject(2);
+    // Set active project
+    fs.writeFileSync(path.join(tmpDir, '.planning', '.active'), 'project-1');
+    // Add ROADMAP.md and a phase dir so execute-phase can find something
+    const projDir = path.join(tmpDir, '.planning', 'project-1');
+    fs.writeFileSync(path.join(projDir, 'ROADMAP.md'), '# Roadmap\n\n### Phase 1: Setup\n**Goal:** Setup\n');
+    fs.mkdirSync(path.join(projDir, 'phases', '01-setup'), { recursive: true });
+    fs.writeFileSync(path.join(projDir, 'phases', '01-setup', '01-01-PLAN.md'), '# Plan');
+
+    const result = runGsdTools(['init', 'execute-phase', '1'], tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+    const output = JSON.parse(result.output);
+    assert.strictEqual(output.needs_selection, undefined, 'should not have needs_selection when .active is valid');
+    assert.ok(output.planning_root, 'should have planning_root (normal operation)');
   });
 });
 
