@@ -14,8 +14,8 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Core Path Resolution** - Central planningRoot function, config loading, and slug storage (completed 2026-03-04)
 - [x] **Phase 2: Init and Tool Integration** - All init functions and gsd-tools commands resolve paths through planningRoot (completed 2026-03-04)
-- [ ] **Phase 3: Workflow Updates** - All 33 workflow files and templates use init-provided paths
-- [ ] **Phase 4: Migration System** - Detect flat layouts, prompt user, migrate files, validate
+- [x] **Phase 3: Workflow Updates** - All 33 workflow files and templates use init-provided paths (completed 2026-03-04)
+- [x] **Phase 4: Migration System** - Detect flat layouts, prompt user, migrate files, validate (completed 2026-03-04)
 - [x] **Phase 5: Multi-Project Support** - Multiple namespaces coexist with selection and listing (completed 2026-03-09)
 - [ ] **Phase 6: Validation and Self-Hosting** - Test suite passes, end-to-end self-host, migration path verified
 
@@ -64,10 +64,10 @@ Plans:
 **Plans**: 4 plans
 
 Plans:
-- [ ] 03-01-PLAN.md — Replace .planning/ refs in heaviest workflows (new-project, complete-milestone, new-milestone)
-- [ ] 03-02-PLAN.md — Replace .planning/ refs in medium-density workflows (map-codebase, execute-plan, etc.)
-- [ ] 03-03-PLAN.md — Replace refs in remaining workflows + add init to no-init workflows
-- [ ] 03-04-PLAN.md — Replace .planning/ refs in all template files
+- [x] 03-01-PLAN.md — Replace .planning/ refs in heaviest workflows (new-project, complete-milestone, new-milestone)
+- [x] 03-02-PLAN.md — Replace .planning/ refs in medium-density workflows (map-codebase, execute-plan, etc.)
+- [x] 03-03-PLAN.md — Replace refs in remaining workflows + add init to no-init workflows
+- [x] 03-04-PLAN.md — Replace .planning/ refs in all template files
 
 ### Phase 4: Migration System
 **Goal**: Users with existing flat `.planning/` layouts are detected and migrated cleanly into a namespace
@@ -81,8 +81,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 04-01-PLAN.md — migration.cjs module: detectFlatLayout, cmdMigrate, validateMigration (TDD)
-- [ ] 04-02-PLAN.md — Wire detection into init functions + migrate command in router
+- [x] 04-01-PLAN.md — migration.cjs module: detectFlatLayout, cmdMigrate, validateMigration (TDD)
+- [x] 04-02-PLAN.md — Wire detection into init functions + migrate command in router
 
 ### Phase 5: Multi-Project Support
 **Goal**: Multiple project namespaces coexist under `.planning/` with clear selection and listing
@@ -107,11 +107,11 @@ Plans:
   1. Existing test suite passes with namespaced paths (no regressions)
   2. A fresh `gsd:new-project` initializes into `.planning/<slug>/`, plans phases, and executes plans successfully
   3. A flat `.planning/` layout is detected, migrated, and all workflows function correctly post-migration
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 06-01: TBD
-- [ ] 06-02: TBD
+- [ ] 06-01-PLAN.md — State reconciliation + fix 12 failing init tests (VALD-01)
+- [ ] 06-02-PLAN.md — E2E self-hosting smoke test + post-migration validation (VALD-02, VALD-03)
 
 ## Progress
 
@@ -123,7 +123,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 |-------|----------------|--------|-----------|
 | 1. Core Path Resolution | 2/2 | Complete   | 2026-03-04 |
 | 2. Init and Tool Integration | 3/3 | Complete   | 2026-03-04 |
-| 3. Workflow Updates | 0/4 | Not started | - |
-| 4. Migration System | 1/2 | In Progress|  |
+| 3. Workflow Updates | 4/4 | Complete | 2026-03-04 |
+| 4. Migration System | 2/2 | Complete | 2026-03-04 |
 | 5. Multi-Project Support | 2/2 | Complete | 2026-03-09 |
-| 6. Validation and Self-Hosting | 0/2 | Not started | - |
+| 6. Validation and Self-Hosting | 0/2 | In Progress | - |
