@@ -47,8 +47,8 @@ Requirements for initial release. Each maps to roadmap phases.
 ### Validation
 
 - [x] **VALD-01**: Existing test suite passes with namespaced paths
-- [ ] **VALD-02**: End-to-end self-host: namespaced GSD can initialize, plan, and execute a test project
-- [ ] **VALD-03**: Migration path tested: flat layout detected, migrated, and all workflows function post-migration
+- [x] **VALD-02**: End-to-end self-host: namespaced GSD can initialize, plan, and execute a test project
+- [x] **VALD-03**: Migration path tested: flat layout detected, migrated, and all workflows function post-migration
 
 ## v2 Requirements
 
@@ -95,8 +95,8 @@ Requirements for initial release. Each maps to roadmap phases.
 | MULT-03 | Phase 5 | Complete |
 | MULT-04 | Phase 5 | Complete |
 | VALD-01 | Phase 6 | Complete |
-| VALD-02 | Phase 6 | Pending |
-| VALD-03 | Phase 6 | Pending |
+| VALD-02 | Phase 6 | Complete |
+| VALD-03 | Phase 6 | Complete |
 
 **Coverage:**
 - v1 requirements: 25 total
