@@ -16,7 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 2: Init and Tool Integration** - All init functions and gsd-tools commands resolve paths through planningRoot (completed 2026-03-04)
 - [ ] **Phase 3: Workflow Updates** - All 33 workflow files and templates use init-provided paths
 - [ ] **Phase 4: Migration System** - Detect flat layouts, prompt user, migrate files, validate
-- [ ] **Phase 5: Multi-Project Support** - Multiple namespaces coexist with selection and listing
+- [x] **Phase 5: Multi-Project Support** - Multiple namespaces coexist with selection and listing (completed 2026-03-09)
 - [ ] **Phase 6: Validation and Self-Hosting** - Test suite passes, end-to-end self-host, migration path verified
 
 ## Phase Details
@@ -96,8 +96,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 05-01-PLAN.md — Core functions (listNamespaces, detectNeedsSelection, cmdListProjects) + CLI routing (TDD)
-- [ ] 05-02-PLAN.md — Wire selection into init functions + cmdInitNewProject updates + switch-project workflow (TDD)
+- [x] 05-01-PLAN.md — Core functions (listNamespaces, detectNeedsSelection, cmdListProjects) + CLI routing (TDD)
+- [x] 05-02-PLAN.md — Wire selection into init functions + cmdInitNewProject updates + switch-project workflow (TDD)
 
 ### Phase 6: Validation and Self-Hosting
 **Goal**: The entire namespaced system is proven to work end-to-end, including migration and self-hosting
@@ -125,5 +125,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | 2. Init and Tool Integration | 3/3 | Complete   | 2026-03-04 |
 | 3. Workflow Updates | 0/4 | Not started | - |
 | 4. Migration System | 1/2 | In Progress|  |
-| 5. Multi-Project Support | 0/2 | Not started | - |
+| 5. Multi-Project Support | 2/2 | Complete | 2026-03-09 |
 | 6. Validation and Self-Hosting | 0/2 | Not started | - |

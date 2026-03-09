@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 05-01-PLAN.md
-last_updated: "2026-03-09T03:43:09.006Z"
-last_activity: 2026-03-05 -- Completed 03-03 (remaining workflow refs replaced)
+stopped_at: Completed 05-02-PLAN.md
+last_updated: "2026-03-09T03:50:31Z"
+last_activity: 2026-03-09 -- Completed 05-02 (init selection interception + switch-project workflow)
 progress:
   total_phases: 6
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 13
-  completed_plans: 12
-  percent: 80
+  completed_plans: 13
+  percent: 100
 ---
 
 # Project State
@@ -25,12 +25,12 @@ See: .planning/PROJECT.md (updated 2026-03-04)
 
 ## Current Position
 
-Phase: 3 of 6 (Workflow Updates)
-Plan: 3 of N in current phase
-Status: In progress
-Last activity: 2026-03-05 -- Completed 03-03 (remaining workflow refs replaced)
+Phase: 5 of 6 (Multi-Project Support)
+Plan: 2 of 2 in current phase
+Status: Phase complete
+Last activity: 2026-03-09 -- Completed 05-02 (init selection interception + switch-project workflow)
 
-Progress: [████████░░] 80%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -62,6 +62,7 @@ Progress: [████████░░] 80%
 | Phase 04-migration-system P01 | 5min | 2 tasks | 3 files |
 | Phase 04-migration-system P02 | 5min | 2 tasks | 2 files |
 | Phase 05 P01 | 4min | 2 tasks | 6 files |
+| Phase 05 P02 | 6min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -99,6 +100,9 @@ Recent decisions affecting current work:
 - [Phase 05]: listNamespaces requires PROJECT.md as namespace marker
 - [Phase 05]: detectNeedsSelection auto-writes .active silently for single-namespace repos
 - [Phase 05]: cmdListProjects reuses listNamespaces from core.cjs rather than duplicating logic
+- [Phase 05-02]: Selection check placed after migration check in all 11 init functions (migration > selection ordering)
+- [Phase 05-02]: cmdInitNewProject excluded from selection detection per user decision
+- [Phase 05-02]: Namespace-aware tests updated to include PROJECT.md for valid namespace validation
 
 ### Pending Todos
 
@@ -111,6 +115,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-09T03:43:09.002Z
-Stopped at: Completed 05-01-PLAN.md
+Last session: 2026-03-09T03:50:31Z
+Stopped at: Completed 05-02-PLAN.md
 Resume file: None
