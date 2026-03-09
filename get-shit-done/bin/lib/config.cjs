@@ -4,7 +4,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { output, error, planningRoot } = require('./core.cjs');
+const { output, error, planningRoot, listNamespaces, safeReadFile } = require('./core.cjs');
 
 function cmdConfigEnsureSection(cwd, raw) {
   const planningDir = planningRoot(cwd);
@@ -188,9 +188,28 @@ function cmdActiveSet(cwd, slug, raw) {
   output({ set: true, slug }, raw, slug);
 }
 
+function cmdListProjects(cwd, raw) {
+  const namespaces = listNamespaces(cwd);
+  const activeContent = safeReadFile(path.join(cwd, '.planning', '.active'));
+  const activeSlug = activeContent ? activeContent.trim() : null;
+
+  const projects = namespaces.map(ns => ({
+    slug: ns.slug,
+    name: ns.name,
+    active: ns.slug === activeSlug,
+  }));
+
+  output({
+    projects,
+    count: projects.length,
+    active_slug: activeSlug || null,
+  }, raw);
+}
+
 module.exports = {
   cmdConfigEnsureSection,
   cmdConfigSet,
   cmdConfigGet,
   cmdActiveSet,
+  cmdListProjects,
 };

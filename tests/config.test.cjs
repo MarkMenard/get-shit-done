@@ -12,7 +12,7 @@ const assert = require('node:assert');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
-const { runGsdTools, createTempProject, cleanup } = require('./helpers.cjs');
+const { runGsdTools, createTempProject, createTempMultiProject, cleanup } = require('./helpers.cjs');
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
@@ -462,5 +462,90 @@ describe('namespace-aware config operations', () => {
 
     const value = JSON.parse(result.output);
     assert.strictEqual(value, 'quality');
+  });
+});
+
+// ─── cmdListProjects ─────────────────────────────────────────────────────────
+
+describe('cmdListProjects', () => {
+  let tmpDir;
+
+  afterEach(() => {
+    if (tmpDir) cleanup(tmpDir);
+  });
+
+  test('returns empty projects when no namespaces', () => {
+    tmpDir = createTempProject();
+    const { cmdListProjects } = require('../get-shit-done/bin/lib/config.cjs');
+    // cmdListProjects calls output() which exits, so use CLI instead
+    const result = runGsdTools('list-projects', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+    const data = JSON.parse(result.output);
+    assert.deepStrictEqual(data.projects, []);
+    assert.strictEqual(data.count, 0);
+    assert.strictEqual(data.active_slug, null);
+  });
+
+  test('returns 2 projects with correct slug/name for a multi-project setup', () => {
+    tmpDir = createTempMultiProject(2);
+    const result = runGsdTools('list-projects', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+    const data = JSON.parse(result.output);
+    assert.strictEqual(data.count, 2);
+    assert.strictEqual(data.projects[0].slug, 'project-1');
+    assert.strictEqual(data.projects[0].name, 'Project 1');
+    assert.strictEqual(data.projects[1].slug, 'project-2');
+    assert.strictEqual(data.projects[1].name, 'Project 2');
+  });
+
+  test('active marker is true for the .active slug, false for others', () => {
+    tmpDir = createTempMultiProject(2);
+    fs.writeFileSync(path.join(tmpDir, '.planning', '.active'), 'project-2');
+    const result = runGsdTools('list-projects', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+    const data = JSON.parse(result.output);
+    assert.strictEqual(data.projects[0].active, false);
+    assert.strictEqual(data.projects[1].active, true);
+    assert.strictEqual(data.active_slug, 'project-2');
+  });
+
+  test('returns null active_slug when no .active file', () => {
+    tmpDir = createTempMultiProject(2);
+    const result = runGsdTools('list-projects', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+    const data = JSON.parse(result.output);
+    assert.strictEqual(data.active_slug, null);
+  });
+});
+
+// ─── list-projects CLI integration ──────────────────────────────────────────
+
+describe('list-projects CLI command', () => {
+  let tmpDir;
+
+  afterEach(() => {
+    if (tmpDir) cleanup(tmpDir);
+  });
+
+  test('runGsdTools list-projects succeeds and returns valid JSON', () => {
+    tmpDir = createTempMultiProject(2);
+    const result = runGsdTools('list-projects', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+    const data = JSON.parse(result.output);
+    assert.ok(Array.isArray(data.projects));
+    assert.strictEqual(typeof data.count, 'number');
+  });
+
+  test('JSON contains projects array with correct structure', () => {
+    tmpDir = createTempMultiProject(2);
+    fs.writeFileSync(path.join(tmpDir, '.planning', '.active'), 'project-1');
+    const result = runGsdTools('list-projects', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+    const data = JSON.parse(result.output);
+    for (const proj of data.projects) {
+      assert.strictEqual(typeof proj.slug, 'string');
+      assert.strictEqual(typeof proj.name, 'string');
+      assert.strictEqual(typeof proj.active, 'boolean');
+    }
   });
 });

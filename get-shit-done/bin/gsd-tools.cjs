@@ -387,6 +387,11 @@ async function main() {
       break;
     }
 
+    case 'list-projects': {
+      config.cmdListProjects(cwd, raw);
+      break;
+    }
+
     case 'history-digest': {
       commands.cmdHistoryDigest(cwd, raw);
       break;
