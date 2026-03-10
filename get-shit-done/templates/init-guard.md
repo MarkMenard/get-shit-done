@@ -8,7 +8,7 @@ If the INIT JSON contains `"needs_migration": true`:
 
 1. Extract `suggested_slug` and `detected_files` from the JSON.
 2. Present an AskUserQuestion to the user:
-   - Show the detected files: "Found planning files at flat `.planning/` layout: [detected_files list]"
+   - Show the detected files: "Found planning files at flat `${planning_root}/` layout: [detected_files list]"
    - Explain: "This project needs to be migrated to a namespaced layout before continuing."
    - Options:
      - **"Migrate now as '[suggested_slug]'"** -- use the suggested slug from init
