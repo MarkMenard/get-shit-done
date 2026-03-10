@@ -18,12 +18,12 @@ allowed-tools:
 Initialize a new project through unified flow: questioning → research (optional) → requirements → roadmap.
 
 **Creates:**
-- `.planning/PROJECT.md` — project context
-- `.planning/config.json` — workflow preferences
-- `.planning/research/` — domain research (optional)
-- `.planning/REQUIREMENTS.md` — scoped requirements
-- `.planning/ROADMAP.md` — phase structure
-- `.planning/STATE.md` — project memory
+- `${planning_root}/PROJECT.md` — project context
+- `${planning_root}/config.json` — workflow preferences
+- `${planning_root}/research/` — domain research (optional)
+- `${planning_root}/REQUIREMENTS.md` — scoped requirements
+- `${planning_root}/ROADMAP.md` — phase structure
+- `${planning_root}/STATE.md` — project memory
 
 **After this command:** Run `/gsd:plan-phase 1` to start execution.
 </objective>
