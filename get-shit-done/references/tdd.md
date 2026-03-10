@@ -50,8 +50,8 @@ Output: [Working, tested feature]
 </objective>
 
 <context>
-@.planning/PROJECT.md
-@.planning/ROADMAP.md
+@${planning_root}/PROJECT.md
+@${planning_root}/ROADMAP.md
 @relevant/source/files.ts
 </context>
 

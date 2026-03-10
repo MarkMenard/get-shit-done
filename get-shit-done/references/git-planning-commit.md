@@ -4,20 +4,20 @@ Commit planning artifacts using the gsd-tools CLI, which automatically checks `c
 
 ## Commit via CLI
 
-Always use `gsd-tools.cjs commit` for `.planning/` files — it handles `commit_docs` and gitignore checks automatically:
+Always use `gsd-tools.cjs commit` for `${planning_root}/` files — it handles `commit_docs` and gitignore checks automatically:
 
 ```bash
-node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" commit "docs({scope}): {description}" --files .planning/STATE.md .planning/ROADMAP.md
+node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" commit "docs({scope}): {description}" --files ${planning_root}/STATE.md ${planning_root}/ROADMAP.md
 ```
 
-The CLI will return `skipped` (with reason) if `commit_docs` is `false` or `.planning/` is gitignored. No manual conditional checks needed.
+The CLI will return `skipped` (with reason) if `commit_docs` is `false` or `${planning_root}/` is gitignored. No manual conditional checks needed.
 
 ## Amend previous commit
 
-To fold `.planning/` file changes into the previous commit:
+To fold `${planning_root}/` file changes into the previous commit:
 
 ```bash
-node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" commit "" --files .planning/codebase/*.md --amend
+node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" commit "" --files ${planning_root}/codebase/*.md --amend
 ```
 
 ## Commit Message Patterns
@@ -34,5 +34,5 @@ node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" commit "" --files .planning
 ## When to Skip
 
 - `commit_docs: false` in config
-- `.planning/` is gitignored
-- No changes to commit (check with `git status --porcelain .planning/`)
+- `${planning_root}/` is gitignored
+- No changes to commit (check with `git status --porcelain ${planning_root}/`)
