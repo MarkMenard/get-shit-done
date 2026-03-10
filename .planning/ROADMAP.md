@@ -18,7 +18,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 4: Migration System** - Detect flat layouts, prompt user, migrate files, validate (completed 2026-03-04)
 - [x] **Phase 5: Multi-Project Support** - Multiple namespaces coexist with selection and listing (completed 2026-03-09)
 - [ ] **Phase 6: Validation and Self-Hosting** - Test suite passes, end-to-end self-host, migration path verified
-- [ ] **Phase 7: Workflow Init Response Handling** - Workflows handle needs_migration/needs_selection init responses gracefully
+- [x] **Phase 7: Workflow Init Response Handling** - Workflows handle needs_migration/needs_selection init responses gracefully (completed 2026-03-10)
 - [ ] **Phase 8: Agent & Command Path Variables** - Agent .md files and remaining commands use path variables instead of hardcoded .planning/
 
 ## Phase Details
@@ -139,8 +139,12 @@ Plans:
   1. All 12 agent .md files use `${planning_root}` instead of hardcoded `.planning/` paths (~60+ refs replaced)
   2. add-tests.md uses `${planning_root}` variables instead of `@.planning/` references
   3. `gsd-context-monitor.js` resolves STATE.md path through namespace instead of hardcoded `.planning/STATE.md`
+**Plans**: 3 plans
 
-Plans: TBD
+Plans:
+- [ ] 08-01-PLAN.md — Hook namespace-aware detection + agent file variable conversion (INT-02, INT-03)
+- [ ] 08-02-PLAN.md — Command file variable conversion (INT-04)
+- [ ] 08-03-PLAN.md — Template/reference conversion + final verification sweep (INT-02, INT-03, INT-04)
 
 ## Progress
 
@@ -156,5 +160,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | 4. Migration System | 2/2 | Complete | 2026-03-04 |
 | 5. Multi-Project Support | 2/2 | Complete | 2026-03-09 |
 | 6. Validation and Self-Hosting | 0/2 | In Progress | - |
-| 7. Workflow Init Response Handling | 1/2 | In Progress | - |
-| 8. Agent & Command Path Variables | 0/0 | Not Started | - |
+| 7. Workflow Init Response Handling | 2/2 | Complete   | 2026-03-10 |
+| 8. Agent & Command Path Variables | 0/3 | Not Started | - |

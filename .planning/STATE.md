@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 07-01-PLAN.md
-last_updated: "2026-03-10T03:08:44Z"
-last_activity: 2026-03-10 -- Completed 07-01 (guard template and JSON shape tests)
+stopped_at: Completed 07-02-PLAN.md
+last_updated: "2026-03-10T03:16:51.487Z"
+last_activity: 2026-03-10 -- Completed 07-02 (workflow guard integration across 28 files)
 progress:
   total_phases: 8
-  completed_phases: 6
-  total_plans: 16
-  completed_plans: 16
+  completed_phases: 7
+  total_plans: 17
+  completed_plans: 17
   percent: 100
 ---
 
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-03-04)
 ## Current Position
 
 Phase: 7 of 8 (Workflow Init Response Handling)
-Plan: 1 of 1 in current phase (complete)
+Plan: 2 of 2 in current phase (complete)
 Status: Executing
-Last activity: 2026-03-10 -- Completed 07-01 (guard template and JSON shape tests)
+Last activity: 2026-03-10 -- Completed 07-02 (workflow guard integration across 28 files)
 
 Progress: [██████████] 100%
 
@@ -66,6 +66,7 @@ Progress: [██████████] 100%
 | Phase 06 P01 | 3min | 2 tasks | 3 files |
 | Phase 06 P02 | 3min | 2 tasks | 2 files |
 | Phase 07 P01 | 2min | 2 tasks | 2 files |
+| Phase 07 P02 | 4min | 2 tasks | 28 files |
 
 ## Accumulated Context
 
@@ -112,6 +113,8 @@ Recent decisions affecting current work:
 - [Phase 07]: Guard template uses 're-run the same init command' pattern rather than hardcoding init subcommands
 - [Phase 07]: Tests organized by scenario (migration, selection, exclusion) with shared assertion helpers
 - [Phase 07]: Selection flow has no skip option; migration flow allows skip but stops the workflow
+- [Phase 07]: Guard reference placed between init+@file: block and field extraction in all 28 workflows
+- [Phase 07]: complete-milestone.md gets two guard references, one per init call site
 
 ### Pending Todos
 
@@ -124,6 +127,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-10T03:08:44Z
-Stopped at: Completed 07-01-PLAN.md
-Resume file: .planning/phases/07-workflow-init-response-handling/07-01-SUMMARY.md
+Last session: 2026-03-10T03:16:51.485Z
+Stopped at: Completed 07-02-PLAN.md
+Resume file: None
