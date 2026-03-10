@@ -31,8 +31,7 @@ Output: Test files committed with message `test(phase-{N}): add unit and E2E tes
 <context>
 Phase: $ARGUMENTS
 
-@.planning/STATE.md
-@.planning/ROADMAP.md
+<!-- State and roadmap loaded by workflow after namespace resolution -->
 </context>
 
 <process>

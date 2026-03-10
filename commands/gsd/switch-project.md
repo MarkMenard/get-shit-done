@@ -8,7 +8,7 @@ allowed-tools:
 ---
 
 <objective>
-Switch the active project namespace when multiple projects exist under .planning/.
+Switch the active project namespace when multiple projects exist under ${planning_root}/.
 
 Handles listing available projects, prompting for selection, and updating the active project pointer.
 </objective>
