@@ -127,7 +127,7 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 07-01-PLAN.md — Guard template + E2E tests for init JSON shapes (INT-01, FLOW-01, FLOW-02)
+- [x] 07-01-PLAN.md — Guard template + E2E tests for init JSON shapes (INT-01, FLOW-01, FLOW-02)
 - [ ] 07-02-PLAN.md — Add guard reference to all 28 workflows (INT-01, FLOW-01, FLOW-02)
 
 ### Phase 8: Agent & Command Path Variables
@@ -156,5 +156,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | 4. Migration System | 2/2 | Complete | 2026-03-04 |
 | 5. Multi-Project Support | 2/2 | Complete | 2026-03-09 |
 | 6. Validation and Self-Hosting | 0/2 | In Progress | - |
-| 7. Workflow Init Response Handling | 0/2 | Not Started | - |
+| 7. Workflow Init Response Handling | 1/2 | In Progress | - |
 | 8. Agent & Command Path Variables | 0/0 | Not Started | - |

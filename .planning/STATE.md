@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: complete
-stopped_at: Completed 06-02-PLAN.md
-last_updated: "2026-03-09T21:12:24.851Z"
-last_activity: 2026-03-09 -- Completed 06-02 (e2e smoke test + post-migration validation)
+status: executing
+stopped_at: Completed 07-01-PLAN.md
+last_updated: "2026-03-10T03:08:44Z"
+last_activity: 2026-03-10 -- Completed 07-01 (guard template and JSON shape tests)
 progress:
-  total_phases: 6
+  total_phases: 8
   completed_phases: 6
-  total_plans: 15
-  completed_plans: 15
+  total_plans: 16
+  completed_plans: 16
   percent: 100
 ---
 
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-04)
 
 **Core value:** Every GSD workflow operates on the correct project's planning state, regardless of branch history or repo context.
-**Current focus:** Phase 6 - Validation and Self-Hosting
+**Current focus:** Phase 7 - Workflow Init Response Handling
 
 ## Current Position
 
-Phase: 6 of 6 (Validation and Self-Hosting)
-Plan: 2 of 2 in current phase (complete)
-Status: Complete
-Last activity: 2026-03-09 -- Completed 06-02 (e2e smoke test + post-migration validation)
+Phase: 7 of 8 (Workflow Init Response Handling)
+Plan: 1 of 1 in current phase (complete)
+Status: Executing
+Last activity: 2026-03-10 -- Completed 07-01 (guard template and JSON shape tests)
 
 Progress: [██████████] 100%
 
@@ -65,6 +65,7 @@ Progress: [██████████] 100%
 | Phase 05 P02 | 6min | 2 tasks | 3 files |
 | Phase 06 P01 | 3min | 2 tasks | 3 files |
 | Phase 06 P02 | 3min | 2 tasks | 2 files |
+| Phase 07 P01 | 2min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -108,6 +109,9 @@ Recent decisions affecting current work:
 - [Phase 06]: Namespace setup added inline per test rather than modifying shared helpers to avoid regressions
 - [Phase 06]: Bare git repo helper for e2e tests avoids migration detection from createTempGitProject
 - [Phase 06]: Post-migration init validation simulates workflow file writes since init returns paths only
+- [Phase 07]: Guard template uses 're-run the same init command' pattern rather than hardcoding init subcommands
+- [Phase 07]: Tests organized by scenario (migration, selection, exclusion) with shared assertion helpers
+- [Phase 07]: Selection flow has no skip option; migration flow allows skip but stops the workflow
 
 ### Pending Todos
 
@@ -120,6 +124,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-09T21:12:24.849Z
-Stopped at: Completed 06-02-PLAN.md
-Resume file: None
+Last session: 2026-03-10T03:08:44Z
+Stopped at: Completed 07-01-PLAN.md
+Resume file: .planning/phases/07-workflow-init-response-handling/07-01-SUMMARY.md
