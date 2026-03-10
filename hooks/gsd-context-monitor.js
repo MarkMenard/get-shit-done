@@ -100,9 +100,16 @@ process.stdin.on('end', () => {
     warnData.lastLevel = currentLevel;
     fs.writeFileSync(warnPath, JSON.stringify(warnData));
 
-    // Detect if GSD is active (has .planning/STATE.md in working directory)
+    // Detect if GSD is active via namespace-aware .active slug resolution
     const cwd = data.cwd || process.cwd();
-    const isGsdActive = fs.existsSync(path.join(cwd, '.planning', 'STATE.md'));
+    const activePath = path.join(cwd, '.planning', '.active');
+    let isGsdActive = false;
+    if (fs.existsSync(activePath)) {
+      const slug = fs.readFileSync(activePath, 'utf8').trim();
+      if (slug) {
+        isGsdActive = fs.existsSync(path.join(cwd, '.planning', slug, 'STATE.md'));
+      }
+    }
 
     // Build advisory warning message (never use imperative commands that
     // override user preferences — see #884)
