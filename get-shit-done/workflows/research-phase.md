@@ -39,6 +39,8 @@ if [[ "$INIT" == @file:* ]]; then INIT=$(cat "${INIT#@file:}"); fi
 # Extract: planning_root, phase_dir, padded_phase, phase_number, state_path, requirements_path, context_path
 ```
 
+Follow the namespace guard in `$HOME/.claude/get-shit-done/templates/init-guard.md`. If it stops, stop.
+
 ## Step 4: Spawn Researcher
 
 ```

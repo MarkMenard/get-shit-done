@@ -33,6 +33,8 @@ INIT=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" init phase-op "${tar
 if [[ "$INIT" == @file:* ]]; then INIT=$(cat "${INIT#@file:}"); fi
 ```
 
+Follow the namespace guard in `$HOME/.claude/get-shit-done/templates/init-guard.md`. If it stops, stop.
+
 Extract: `planning_root`, `phase_found`, `phase_dir`, `phase_number`, `commit_docs`, `roadmap_exists`.
 
 Also read STATE.md and ROADMAP.md content for parsing current position.
