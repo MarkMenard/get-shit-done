@@ -15,6 +15,8 @@ INIT=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" init milestone-op)
 if [[ "$INIT" == @file:* ]]; then INIT=$(cat "${INIT#@file:}"); fi
 ```
 
+Follow the namespace guard in `$HOME/.claude/get-shit-done/templates/init-guard.md`. If it stops, stop.
+
 Extract from init JSON: `planning_root`, `milestone_version`, `milestone_name`, `phase_count`, `completed_phases`, `commit_docs`.
 
 Resolve integration checker model:

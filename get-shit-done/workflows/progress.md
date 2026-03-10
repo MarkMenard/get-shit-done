@@ -16,6 +16,8 @@ INIT=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" init progress)
 if [[ "$INIT" == @file:* ]]; then INIT=$(cat "${INIT#@file:}"); fi
 ```
 
+Follow the namespace guard in `$HOME/.claude/get-shit-done/templates/init-guard.md`. If it stops, stop.
+
 Extract from init JSON: `project_exists`, `roadmap_exists`, `state_exists`, `phases`, `current_phase`, `next_phase`, `milestone_version`, `completed_count`, `phase_count`, `paused_at`, `state_path`, `roadmap_path`, `project_path`, `config_path`.
 
 If `project_exists` is false (no planning root directory):

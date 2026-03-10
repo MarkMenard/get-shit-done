@@ -19,6 +19,8 @@ INIT=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" init new-milestone)
 if [[ "$INIT" == @file:* ]]; then INIT=$(cat "${INIT#@file:}"); fi
 ```
 
+Follow the namespace guard in `$HOME/.claude/get-shit-done/templates/init-guard.md`. If it stops, stop.
+
 Extract from init JSON: `planning_root`, `researcher_model`, `synthesizer_model`, `roadmapper_model`, `commit_docs`, `research_enabled`, `current_milestone`, `project_exists`, `roadmap_exists`.
 
 ## 1. Load Context

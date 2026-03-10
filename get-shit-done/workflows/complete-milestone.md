@@ -42,6 +42,8 @@ INIT=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" init milestone-op)
 if [[ "$INIT" == @file:* ]]; then INIT=$(cat "${INIT#@file:}"); fi
 ```
 
+Follow the namespace guard in `$HOME/.claude/get-shit-done/templates/init-guard.md`. If it stops, stop.
+
 Extract from init JSON: `planning_root`, `state_path`, `roadmap_path`, `requirements_path`, `config_path`.
 
 </step>
@@ -542,6 +544,8 @@ Use `init milestone-op` for context, or load config directly:
 INIT=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" init execute-phase "1")
 if [[ "$INIT" == @file:* ]]; then INIT=$(cat "${INIT#@file:}"); fi
 ```
+
+Follow the namespace guard in `$HOME/.claude/get-shit-done/templates/init-guard.md`. If it stops, stop.
 
 Extract `branching_strategy`, `phase_branch_template`, `milestone_branch_template`, and `commit_docs` from init JSON.
 

@@ -24,6 +24,8 @@ INIT=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" init resume)
 if [[ "$INIT" == @file:* ]]; then INIT=$(cat "${INIT#@file:}"); fi
 ```
 
+Follow the namespace guard in `$HOME/.claude/get-shit-done/templates/init-guard.md`. If it stops, stop.
+
 Parse JSON for: `state_exists`, `roadmap_exists`, `project_exists`, `planning_exists`, `has_interrupted_agent`, `interrupted_agent_id`, `commit_docs`.
 
 **If `state_exists` is true:** Proceed to load_state

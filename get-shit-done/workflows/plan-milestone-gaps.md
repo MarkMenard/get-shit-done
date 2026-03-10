@@ -15,6 +15,8 @@ INIT=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" init milestone-op)
 if [[ "$INIT" == @file:* ]]; then INIT=$(cat "${INIT#@file:}"); fi
 ```
 
+Follow the namespace guard in `$HOME/.claude/get-shit-done/templates/init-guard.md`. If it stops, stop.
+
 Extract from init JSON: `planning_root`, `state_path`, `roadmap_path`, `requirements_path`.
 
 ## 1. Load Audit Results
