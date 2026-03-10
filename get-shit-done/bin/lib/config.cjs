@@ -75,7 +75,9 @@ function cmdConfigEnsureSection(cwd, raw) {
 
   try {
     fs.writeFileSync(configPath, JSON.stringify(defaults, null, 2), 'utf-8');
-    const result = { created: true, path: '.planning/config.json' };
+    const { toPosixPath } = require('./core.cjs');
+    const rootRel = toPosixPath(path.relative(cwd, planningDir));
+    const result = { created: true, path: `${rootRel}/config.json` };
     output(result, raw, 'created');
   } catch (err) {
     error('Failed to create config.json: ' + err.message);

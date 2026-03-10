@@ -22,7 +22,7 @@
  *   current-timestamp [format]         Get timestamp (full|date|filename)
  *   list-todos [area]                  Count and enumerate pending todos
  *   verify-path-exists <path>          Check file/directory existence
- *   config-ensure-section              Initialize .planning/config.json
+ *   config-ensure-section              Initialize config.json in planning root
  *   history-digest                     Aggregate all SUMMARY.md data
  *   summary-extract <path> [--fields]  Extract structured data from SUMMARY.md
  *   state-snapshot                     Structured parse of STATE.md
@@ -53,7 +53,7 @@
  *
  * Validation:
  *   validate consistency               Check phase numbering, disk/roadmap sync
- *   validate health [--repair]         Check .planning/ integrity, optionally repair
+ *   validate health [--repair]         Check planning root integrity, optionally repair
  *
  * Progress:
  *   progress [json|table|bar]          Render progress in various formats

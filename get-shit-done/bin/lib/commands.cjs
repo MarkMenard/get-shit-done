@@ -237,7 +237,7 @@ function cmdCommit(cwd, message, files, raw, amend) {
   }
 
   // Stage files
-  const filesToStage = files && files.length > 0 ? files : ['.planning/'];
+  const filesToStage = files && files.length > 0 ? files : [toPosixPath(path.relative(cwd, planningRoot(cwd))) + '/'];
   for (const file of filesToStage) {
     execGit(cwd, ['add', file]);
   }

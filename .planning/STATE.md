@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Phase 8 context gathered
-last_updated: "2026-03-10T16:38:42.897Z"
-last_activity: 2026-03-10 -- Completed 07-02 (workflow guard integration across 28 files)
+stopped_at: Completed 08-03-PLAN.md
+last_updated: "2026-03-10T16:56:38.627Z"
+last_activity: 2026-03-10 -- Completed 08-03 (template/reference path variable conversion, 20 files)
 progress:
   total_phases: 8
   completed_phases: 7
   total_plans: 21
-  completed_plans: 18
-  percent: 100
+  completed_plans: 20
+  percent: 95
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-03-04)
 ## Current Position
 
 Phase: 8 of 8 (Agent/Command Path Variables)
-Plan: 2 of 4 in current phase
+Plan: 3 of 4 in current phase
 Status: Executing
-Last activity: 2026-03-10 -- Completed 08-02 (command file path variable conversion, 13 files)
+Last activity: 2026-03-10 -- Completed 08-03 (template/reference path variable conversion, 20 files)
 
-Progress: [█████████░] 86%
+Progress: [██████████] 95%
 
 ## Performance Metrics
 
@@ -69,6 +69,8 @@ Progress: [█████████░] 86%
 | Phase 07 P02 | 4min | 2 tasks | 28 files |
 | Phase 08 P01 | 3min | 2 tasks | 1 files |
 | Phase 08 P02 | 5min | 2 tasks | 13 files |
+| Phase 08 P01 | 14min | 2 tasks | 11 files |
+| Phase 08 P03 | 5min | 2 tasks | 20 files |
 
 ## Accumulated Context
 
@@ -119,6 +121,9 @@ Recent decisions affecting current work:
 - [Phase 07]: complete-milestone.md gets two guard references, one per init call site
 - [Phase 08]: @-prefix file-loading refs removed with HTML comment noting workflow handles loading after namespace resolution
 - [Phase 08]: Instructional/documentation .planning/ refs converted to ${planning_root} variable notation
+- [Phase 08]: Hook uses .active slug resolution with no flat-layout fallback (clean break)
+- [Phase 08]: Agent files use ${planning_root}/${state_path}/${requirements_path}/${codebase_dir} variables per Phase 3 convention
+- [Phase 08]: Variablized ALL .planning/ refs in templates/references including instructional text per user decision
 
 ### Pending Todos
 
@@ -131,5 +136,5 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-10T16:38:00Z
-Stopped at: Completed 08-02-PLAN.md
+Last session: 2026-03-10T16:56:38.624Z
+Stopped at: Completed 08-03-PLAN.md
