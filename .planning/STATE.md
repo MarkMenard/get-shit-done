@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 07-02-PLAN.md
-last_updated: "2026-03-10T03:16:51.487Z"
+stopped_at: Phase 8 context gathered
+last_updated: "2026-03-10T16:38:42.897Z"
 last_activity: 2026-03-10 -- Completed 07-02 (workflow guard integration across 28 files)
 progress:
   total_phases: 8
   completed_phases: 7
-  total_plans: 17
-  completed_plans: 17
+  total_plans: 21
+  completed_plans: 18
   percent: 100
 ---
 
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-04)
 
 **Core value:** Every GSD workflow operates on the correct project's planning state, regardless of branch history or repo context.
-**Current focus:** Phase 7 - Workflow Init Response Handling
+**Current focus:** Phase 8 - Agent/Command Path Variables
 
 ## Current Position
 
-Phase: 7 of 8 (Workflow Init Response Handling)
-Plan: 2 of 2 in current phase (complete)
+Phase: 8 of 8 (Agent/Command Path Variables)
+Plan: 2 of 4 in current phase
 Status: Executing
-Last activity: 2026-03-10 -- Completed 07-02 (workflow guard integration across 28 files)
+Last activity: 2026-03-10 -- Completed 08-02 (command file path variable conversion, 13 files)
 
-Progress: [██████████] 100%
+Progress: [█████████░] 86%
 
 ## Performance Metrics
 
@@ -67,6 +67,8 @@ Progress: [██████████] 100%
 | Phase 06 P02 | 3min | 2 tasks | 2 files |
 | Phase 07 P01 | 2min | 2 tasks | 2 files |
 | Phase 07 P02 | 4min | 2 tasks | 28 files |
+| Phase 08 P01 | 3min | 2 tasks | 1 files |
+| Phase 08 P02 | 5min | 2 tasks | 13 files |
 
 ## Accumulated Context
 
@@ -115,6 +117,8 @@ Recent decisions affecting current work:
 - [Phase 07]: Selection flow has no skip option; migration flow allows skip but stops the workflow
 - [Phase 07]: Guard reference placed between init+@file: block and field extraction in all 28 workflows
 - [Phase 07]: complete-milestone.md gets two guard references, one per init call site
+- [Phase 08]: @-prefix file-loading refs removed with HTML comment noting workflow handles loading after namespace resolution
+- [Phase 08]: Instructional/documentation .planning/ refs converted to ${planning_root} variable notation
 
 ### Pending Todos
 
@@ -127,6 +131,5 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-10T03:16:51.485Z
-Stopped at: Completed 07-02-PLAN.md
-Resume file: None
+Last session: 2026-03-10T16:38:00Z
+Stopped at: Completed 08-02-PLAN.md

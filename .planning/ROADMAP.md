@@ -162,4 +162,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | 5. Multi-Project Support | 2/2 | Complete | 2026-03-09 |
 | 6. Validation and Self-Hosting | 0/2 | In Progress | - |
 | 7. Workflow Init Response Handling | 2/2 | Complete   | 2026-03-10 |
-| 8. Agent & Command Path Variables | 0/4 | Not Started | - |
+| 8. Agent & Command Path Variables | 1/4 | In Progress|  |
