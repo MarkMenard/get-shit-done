@@ -18,6 +18,8 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 4: Migration System** - Detect flat layouts, prompt user, migrate files, validate (completed 2026-03-04)
 - [x] **Phase 5: Multi-Project Support** - Multiple namespaces coexist with selection and listing (completed 2026-03-09)
 - [ ] **Phase 6: Validation and Self-Hosting** - Test suite passes, end-to-end self-host, migration path verified
+- [ ] **Phase 7: Workflow Init Response Handling** - Workflows handle needs_migration/needs_selection init responses gracefully
+- [ ] **Phase 8: Agent & Command Path Variables** - Agent .md files and remaining commands use path variables instead of hardcoded .planning/
 
 ## Phase Details
 
@@ -113,6 +115,33 @@ Plans:
 - [ ] 06-01-PLAN.md — State reconciliation + fix 12 failing init tests (VALD-01)
 - [ ] 06-02-PLAN.md — E2E self-hosting smoke test + post-migration validation (VALD-02, VALD-03)
 
+### Phase 7: Workflow Init Response Handling
+**Goal**: Workflows gracefully handle `needs_migration` and `needs_selection` init responses instead of erroring on missing fields
+**Depends on**: Phase 4, Phase 5
+**Requirements**: Gap closure (INT-01, FLOW-01, FLOW-02)
+**Gap Closure:** Closes gaps from audit
+**Success Criteria** (what must be TRUE):
+  1. When init returns `needs_migration`, the workflow detects this and routes the user to the migration prompt
+  2. When init returns `needs_selection`, the workflow detects this and routes the user to project selection
+  3. Both migration and selection flows complete end-to-end without workflow errors
+**Plans**: 2 plans
+
+Plans:
+- [ ] 07-01-PLAN.md — Guard template + E2E tests for init JSON shapes (INT-01, FLOW-01, FLOW-02)
+- [ ] 07-02-PLAN.md — Add guard reference to all 28 workflows (INT-01, FLOW-01, FLOW-02)
+
+### Phase 8: Agent & Command Path Variables
+**Goal**: All agent .md files, add-tests.md, and the context monitor hook use path variables instead of hardcoded `.planning/` strings
+**Depends on**: Phase 3
+**Requirements**: Gap closure (INT-02, INT-03, INT-04)
+**Gap Closure:** Closes gaps from audit
+**Success Criteria** (what must be TRUE):
+  1. All 12 agent .md files use `${planning_root}` instead of hardcoded `.planning/` paths (~60+ refs replaced)
+  2. add-tests.md uses `${planning_root}` variables instead of `@.planning/` references
+  3. `gsd-context-monitor.js` resolves STATE.md path through namespace instead of hardcoded `.planning/STATE.md`
+
+Plans: TBD
+
 ## Progress
 
 **Execution Order:**
@@ -127,3 +156,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | 4. Migration System | 2/2 | Complete | 2026-03-04 |
 | 5. Multi-Project Support | 2/2 | Complete | 2026-03-09 |
 | 6. Validation and Self-Hosting | 0/2 | In Progress | - |
+| 7. Workflow Init Response Handling | 0/2 | Not Started | - |
+| 8. Agent & Command Path Variables | 0/0 | Not Started | - |
