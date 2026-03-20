@@ -1902,8 +1902,9 @@ function install(isGlobal, runtime = 'claude') {
 
   console.log(`  Installing for ${cyan}${runtimeLabel}${reset} to ${cyan}${locationLabel}${reset}\n`);
 
-  // Track installation failures
+  // Track installation failures and hook state
   const failures = [];
+  let hooksInstalled = false;
 
   // Save any locally modified GSD files before they get wiped
   saveLocalPatches(targetDir);
@@ -2034,9 +2035,16 @@ function install(isGlobal, runtime = 'claude') {
     fs.writeFileSync(pkgJsonDest, '{"type":"commonjs"}\n');
     console.log(`  ${green}✓${reset} Wrote package.json (CommonJS mode)`);
 
-    // Copy hooks from dist/ (bundled with dependencies)
+    // Copy hooks from dist/ (bundled with dependencies), falling back to hooks/ source
     // Template paths for the target runtime (replaces '.claude' with correct config dir)
-    const hooksSrc = path.join(src, 'hooks', 'dist');
+    let hooksSrc = path.join(src, 'hooks', 'dist');
+    if (!fs.existsSync(hooksSrc)) {
+      // Fallback: hooks/dist/ not built, copy directly from source hooks/
+      const hooksSrcFallback = path.join(src, 'hooks');
+      if (fs.existsSync(hooksSrcFallback)) {
+        hooksSrc = hooksSrcFallback;
+      }
+    }
     if (fs.existsSync(hooksSrc)) {
       const hooksDest = path.join(targetDir, 'hooks');
       fs.mkdirSync(hooksDest, { recursive: true });
@@ -2057,6 +2065,7 @@ function install(isGlobal, runtime = 'claude') {
         }
       }
       if (verifyInstalled(hooksDest, 'hooks')) {
+        hooksInstalled = true;
         console.log(`  ${green}✓${reset} Installed hooks (bundled)`);
       } else {
         failures.push('hooks');
@@ -2144,7 +2153,8 @@ function install(isGlobal, runtime = 'claude') {
   }
 
   // Configure SessionStart hook for update checking (skip for opencode)
-  if (!isOpencode) {
+  // Only add hook entries if the hook files were actually installed
+  if (!isOpencode && hooksInstalled) {
     if (!settings.hooks) {
       settings.hooks = {};
     }

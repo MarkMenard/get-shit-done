@@ -1,3 +1,4 @@
+also chec
 node_modules/
 .DS_Store
 TO-DOS.md
@@ -17,6 +18,9 @@ coverage/
 # Animation assets
 animation/
 *.gif
+
+# IntelliJ
+.idea
 
 # Internal planning documents
 reports/
